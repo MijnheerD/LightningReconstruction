@@ -1,3 +1,7 @@
+"""
+TODO: solve bug with selection indices
+"""
+
 from Lightcone_approach.LinAlg import angle_between
 from sortedcontainers import SortedList
 import numpy as np
@@ -69,21 +73,21 @@ class Stepper:
         """
         for index in [-1, 0]:
             self.search = False
-            element = self.pool[index]
+            # element = self.pool[index]
             values = {}
 
-            select = self.in_lightcone(element)
+            select = self.in_lightcone(index)
             indices = np.array(range(len(self.t)))
-            possible_points = set(indices[select])
+            possible_points = indices[select]
 
             for point in possible_points:
                 if point not in self.pool:
                     if len(self.pool) == 1:
-                        d = self._distance_pair(element, point)
-                        v = self._velocity_penalty((element, element), (element, point))
+                        d = self._distance_pair(index, point)
+                        v = self._velocity_penalty((index, index), (index, point))
                     else:
-                        d = self._distance_pair(element, point)
-                        v = self._velocity_penalty((self.pool[int(index + (-1)**index)], element), (element, point))
+                        d = self._distance_pair(index, point)
+                        v = self._velocity_penalty((int(index + (-1)**index), index), (index, point))
 
                     values[point] = self.distance_weight * d + self.vel_weight * v
 
@@ -96,3 +100,5 @@ class Stepper:
         while self.search:
             print(f'Still looping, already selected {len(self.pool)} points')
             self.find_next()
+            if len(self.pool)>=300:
+                break
