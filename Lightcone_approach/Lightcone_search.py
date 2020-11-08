@@ -4,7 +4,7 @@ import numpy as np
 
 
 class Stepper:
-    def __init__(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: np.ndarray, seed, weights=(1, 0), t_cut=1e-9):
+    def __init__(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: np.ndarray, seed, weights=(1, 0), t_cut=1e-7):
         self.x = x
         self.y = y
         self.z = z
@@ -12,6 +12,7 @@ class Stepper:
         self.pool = SortedList([seed])
         self.distance_weight, self.vel_weight = weights
         self.time_cutoff = t_cut
+        self.search = True
 
     def in_lightcone(self, p: int):
         """
@@ -22,18 +23,17 @@ class Stepper:
         x0, y0, z0, t0 = self.x[p], self.y[p], self.z[p], self.t[p]
 
         # Points must be close enough in time to be eligible
-        x = self.x[(t0 - self.time_cutoff) <= self.t <= (t0 + self.time_cutoff)]
-        y = self.y[(t0 - self.time_cutoff) <= self.t <= (t0 + self.time_cutoff)]
-        z = self.z[(t0 - self.time_cutoff) <= self.t <= (t0 + self.time_cutoff)]
-        t = self.t[(t0 - self.time_cutoff) <= self.t <= (t0 + self.time_cutoff)]
+        select1 = (t0 - self.time_cutoff) <= self.t
+        select2 = self.t <= (t0 + self.time_cutoff)
 
         # Use speed of lightning propagation
         c = 10 ** 7
 
         # Calculate spacetime interval
-        ds = -c ** 2 * (t - t0) ** 2 + (x - x0) ** 2 + (y - y0) ** 2 + (z - z0) ** 2
+        ds = -c ** 2 * (self.t - t0) ** 2 + (self.x - x0) ** 2 + (self.y - y0) ** 2 + (self.z - z0) ** 2
+        selection = ds <= 0
 
-        return ds <= 0
+        return selection*select1*select2
 
     def _distance_pair(self, p1, p2):
         """
@@ -68,20 +68,31 @@ class Stepper:
         :return:
         """
         for index in [-1, 0]:
+            self.search = False
             element = self.pool[index]
             values = {}
-            possible_points = set()
 
             select = self.in_lightcone(element)
             indices = np.array(range(len(self.t)))
-            possible_points.add(indices[select])
+            possible_points = set(indices[select])
 
             for point in possible_points:
                 if point not in self.pool:
-                    d = self._distance_pair(element, point)
-                    v = self._velocity_penalty((self.pool[index + (-1)**index], element), (element, point))
+                    if len(self.pool) == 1:
+                        d = self._distance_pair(element, point)
+                        v = self._velocity_penalty((element, element), (element, point))
+                    else:
+                        d = self._distance_pair(element, point)
+                        v = self._velocity_penalty((self.pool[int(index + (-1)**index)], element), (element, point))
 
                     values[point] = self.distance_weight * d + self.vel_weight * v
 
-            seed_add = min(values, key=values.__getitem__)
-            self.pool.add(seed_add)
+            if len(values) != 0:
+                self.search = True
+                seed_add = min(values, key=values.__getitem__)
+                self.pool.add(seed_add)
+
+    def run(self):
+        while self.search:
+            print(f'Still looping, already selected {len(self.pool)} points')
+            self.find_next()
