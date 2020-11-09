@@ -1,5 +1,5 @@
 """
-TODO: solve bug with selection indices
+TODO: optimize weights
 """
 
 from Lightcone_approach.LinAlg import angle_between
@@ -31,7 +31,7 @@ class Stepper:
         select2 = self.t <= (t0 + self.time_cutoff)
 
         # Use speed of lightning propagation
-        c = 10 ** 7
+        c = 3 * 10 ** 8
 
         # Calculate spacetime interval
         ds = -c ** 2 * (self.t - t0) ** 2 + (self.x - x0) ** 2 + (self.y - y0) ** 2 + (self.z - z0) ** 2
@@ -49,7 +49,7 @@ class Stepper:
         x1, y1, z1 = self.x[p1], self.y[p1], self.z[p1]
         x2, y2, z2 = self.x[p2], self.y[p2], self.z[p2]
 
-        return (x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2
+        return np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2)
 
     def _velocity_penalty(self, v1, v2):
         """
@@ -73,21 +73,21 @@ class Stepper:
         """
         for index in [-1, 0]:
             self.search = False
-            # element = self.pool[index]
+            element = self.pool[index]
             values = {}
 
-            select = self.in_lightcone(index)
+            select = self.in_lightcone(element)
             indices = np.array(range(len(self.t)))
             possible_points = indices[select]
 
             for point in possible_points:
                 if point not in self.pool:
                     if len(self.pool) == 1:
-                        d = self._distance_pair(index, point)
-                        v = self._velocity_penalty((index, index), (index, point))
+                        d = self._distance_pair(element, point)
+                        v = 0
                     else:
-                        d = self._distance_pair(index, point)
-                        v = self._velocity_penalty((int(index + (-1)**index), index), (index, point))
+                        d = self._distance_pair(element, point)
+                        v = self._velocity_penalty((self.pool[int(index + (-1)**index)], element), (element, point))
 
                     values[point] = self.distance_weight * d + self.vel_weight * v
 

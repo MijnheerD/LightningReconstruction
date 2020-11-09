@@ -22,7 +22,7 @@ xcut = x[selection]
 ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
-search = Stepper(xcut, ycut, zcut, tcut, 27, (10, 10), 1e-2)
+search = Stepper(xcut, ycut, zcut, tcut, 27, (1, 1e4), 0.1)
 search.run()
 
 '''
