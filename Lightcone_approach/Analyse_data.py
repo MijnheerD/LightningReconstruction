@@ -22,7 +22,7 @@ xcut = x[selection]
 ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
-search = Stepper(xcut, ycut, zcut, tcut, 27, (1, 1e4), 0.1)
+search = Stepper(xcut, ycut, zcut, tcut, 27, (1, 0), 0.1)
 search.run()
 
 '''
@@ -50,6 +50,8 @@ ax3 = fig2.add_subplot(111, projection='3d')
 ax3.scatter(xcut, ycut, zcut, marker='^', c='b')
 ax3.scatter([xcut[ind] for ind in search.pool], [ycut[ind] for ind in search.pool], [zcut[ind] for ind in search.pool],
             marker='o', c='r')
+ax3.scatter(xcut[27], ycut[27], zcut[27],
+            marker='o', c='k', s=60)
 ax3.set_xlabel('X')
 ax3.set_ylabel('Y')
 ax3.set_zlabel('Z')

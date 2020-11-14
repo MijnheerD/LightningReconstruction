@@ -3,7 +3,7 @@ TODO: optimize weights
 """
 
 from Lightcone_approach.LinAlg import angle_between
-from sortedcontainers import SortedList
+from collections import deque
 import numpy as np
 
 
@@ -13,7 +13,7 @@ class Stepper:
         self.y = y
         self.z = z
         self.t = t
-        self.pool = SortedList([seed])
+        self.pool = deque([seed])
         self.distance_weight, self.vel_weight = weights
         self.time_cutoff = t_cut
         self.search = True
@@ -94,11 +94,14 @@ class Stepper:
             if len(values) != 0:
                 self.search = True
                 seed_add = min(values, key=values.__getitem__)
-                self.pool.add(seed_add)
+                if index == -1:
+                    self.pool.append(seed_add)
+                else:
+                    self.pool.appendleft(seed_add)
 
     def run(self):
         while self.search:
             print(f'Still looping, already selected {len(self.pool)} points')
             self.find_next()
-            if len(self.pool)>=300:
+            if len(self.pool)>=50:
                 break
