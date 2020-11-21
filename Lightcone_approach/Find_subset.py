@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as col
 import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
-from Lightcone_approach.Lightcone_search_one_direction import Tracker
 
 
 data = np.genfromtxt("data_test.txt", delimiter=",")
@@ -25,21 +24,12 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-# Make sure data is sorted by time
-START = np.argmax(ycut)
-search = Tracker(xcut, ycut, zcut, tcut, START, (1, 0), 700, direction=-1, max_points=200)
-search.run()
-
 fig = plt.figure(1, figsize=(10, 10))
 ax = fig.add_subplot(111, projection='3d')
 
 cmap = cm.plasma
 norm = col.Normalize(vmin=min(tcut), vmax=max(tcut))
-ax.scatter(xcut, ycut, zcut, marker='^', c=tcut, cmap=cmap, norm=norm)
-ax.plot([xcut[ind] for ind in search.pool], [ycut[ind] for ind in search.pool], [zcut[ind] for ind in search.pool],
-        marker='o', c='navy', fillstyle='none')
-ax.plot(xcut[START], ycut[START], zcut[START],
-        marker='o', c='lime', fillstyle='none')
+ax.scatter(xcut, ycut, zcut, marker='o', c=tcut, cmap=cmap, norm=norm)
 
 ax.set_xlabel('X')
 ax.set_ylabel('Y')

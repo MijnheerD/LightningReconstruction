@@ -1,17 +1,16 @@
-"""
-TODO: optimize weights
-"""
-
 from Lightcone_approach.LinAlg import angle_between
 from collections import deque
 from itertools import combinations
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as col
+import matplotlib.cm as cm
 from mpl_toolkits.mplot3d import Axes3D
 
 
-class Stepper:
-    def __init__(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: np.ndarray, seed, weights=(1, 0), d_cut=1000):
+class Tracker:
+    def __init__(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: np.ndarray,
+                 seed, weights=(1, 0), d_cut=1000, direction=-1, max_points = 20):
         self.x = x
         self.y = y
         self.z = z
@@ -19,7 +18,9 @@ class Stepper:
         self.pool = deque([seed])
         self.distance_weight, self.vel_weight = weights
         self.distance_cutoff = d_cut
+        self.direction = direction
         self.search = True
+        self.max_points = max_points
 
     def in_lightcone(self, p: int):
         """
@@ -38,9 +39,15 @@ class Stepper:
         selection = ds <= 0
 
         # Points must be close enough to be eligible
-        limit1 = np.sqrt((self.x - x0) ** 2 + (self.y - y0) ** 2 + (self.z - z0) ** 2) <= self.distance_cutoff
+        limit_d = np.sqrt((self.x - x0) ** 2 + (self.y - y0) ** 2 + (self.z - z0) ** 2) <= self.distance_cutoff
+        if self.direction == 1:
+            limit_t = self.t >= t0
+        elif self.direction == -1:
+            limit_t = self.t <= t0
+        else:
+            raise Exception("Unknown direction for search")
 
-        return selection*limit1
+        return selection*limit_d*limit_t
 
     def _distance_pair(self, p1, p2):
         """
@@ -69,33 +76,51 @@ class Stepper:
 
         return np.sin(angle / 2)
 
+    def _find_next(self, index, prev):
+        indices = np.array(range(len(self.t)))
+        values = {}
+
+        element = self.pool[index]
+        select = self.in_lightcone(element)
+        possible_points = indices[select]
+
+        for point in possible_points:
+            if point not in self.pool:
+                d = self._distance_pair(element, point)
+                v = self._velocity_penalty((self.pool[prev], element), (element, point))
+                values[point] = self.distance_weight * d + self.vel_weight * v
+
+        return values
+
     def find_next(self):
         """
         Finds next points at both begin and tail of the current researched branch.
         :return:
         """
         self.search = False
-        for index, prev in zip([-1, 0], [-2, 1]):
-            element = self.pool[index]
-            values = {}
 
-            select = self.in_lightcone(element)
-            indices = np.array(range(len(self.t)))
-            possible_points = indices[select]
+        if self.direction == -1:
+            index = 0
+            prev = 1
 
-            for point in possible_points:
-                if point not in self.pool:
-                    d = self._distance_pair(element, point)
-                    v = self._velocity_penalty((self.pool[prev], element), (element, point))
-                    values[point] = self.distance_weight * d + self.vel_weight * v
+            values = self._find_next(index, prev)
 
             if len(values) != 0:
                 self.search = True
                 seed_add = min(values, key=values.__getitem__)
-                if index == -1:
-                    self.pool.append(seed_add)
-                else:
-                    self.pool.appendleft(seed_add)
+                self.pool.appendleft(seed_add)
+
+        elif self.direction == 1:
+            index = -1
+            prev = -2
+
+            values = self._find_next(index, prev)
+
+            if len(values) != 0:
+                self.search = True
+                seed_add = min(values, key=values.__getitem__)
+                self.pool.append(seed_add)
+
 
     def first_step(self):
         assert len(self.pool) == 1, "This is not the first step"
@@ -139,7 +164,7 @@ class Stepper:
         while self.search:
             print(f'Still looping, already selected {len(self.pool) - 1} new points')
             self.find_next()
-            if len(self.pool)>=20:
+            if len(self.pool) >= self.max_points:
                 break
 
     def run_graph(self):
@@ -148,12 +173,16 @@ class Stepper:
         plt.ion()
         plt.show()
 
-        ax.scatter(self.x, self.y, self.z, marker='^', c='navy', alpha=0.2)
-        ax.scatter(self.x[self.pool[0]], self.y[self.pool[0]], self.z[self.pool[0]], marker='o', c='k')
+        cmap = cm.plasma
+        norm = col.Normalize(vmin=min(self.t), vmax=max(self.t))
+        ax.scatter(self.x, self.y, self.z, marker='^', c=self.t, cmap=cmap, norm=norm, alpha=0.2)
+        ax.plot(self.x[self.pool[0]], self.y[self.pool[0]], self.z[self.pool[0]],
+                   marker='o', c='lime', fillstyle='none')
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
         ax.set_title('Selection algorithm')
+        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
 
         plt.draw()
         plt.pause(0.001)
@@ -161,8 +190,12 @@ class Stepper:
 
         self.first_step()
 
-        ax.scatter(self.x[self.pool[0]], self.y[self.pool[0]], self.z[self.pool[0]], marker='o', c='maroon')
-        ax.scatter(self.x[self.pool[-1]], self.y[self.pool[-1]], self.z[self.pool[-1]], marker='o', c='maroon')
+        if self.direction == -1:
+            ax.plot(self.x[self.pool[0]], self.y[self.pool[0]], self.z[self.pool[0]],
+                   marker='o', c='navy', fillstyle='none')
+        elif self.direction == 1:
+            ax.plot(self.x[self.pool[-1]], self.y[self.pool[-1]], self.z[self.pool[-1]],
+                    marker='o', c='navy', fillstyle='none')
 
         plt.draw()
         plt.pause(0.001)
@@ -171,8 +204,12 @@ class Stepper:
         while self.search:
             self.find_next()
 
-            ax.scatter(self.x[self.pool[0]], self.y[self.pool[0]], self.z[self.pool[0]], marker='o', c='maroon')
-            ax.scatter(self.x[self.pool[-1]], self.y[self.pool[-1]], self.z[self.pool[-1]], marker='o', c='maroon')
+            if self.direction == -1:
+                ax.plot(self.x[self.pool[0]], self.y[self.pool[0]], self.z[self.pool[0]],
+                        marker='o', c='navy', fillstyle='none')
+            elif self.direction == 1:
+                ax.plot(self.x[self.pool[-1]], self.y[self.pool[-1]], self.z[self.pool[-1]],
+                        marker='o', c='navy', fillstyle='none')
 
             print(f'Still looping, already selected {len(self.pool) - 1} new points')
 
@@ -180,5 +217,5 @@ class Stepper:
             plt.pause(0.001)
             input('Press enter to continue: ')
 
-            if len(self.pool) >= 20:
+            if len(self.pool) >= self.max_points:
                 break
