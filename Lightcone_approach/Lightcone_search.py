@@ -1,7 +1,3 @@
-"""
-TODO: optimize weights
-"""
-
 from Lightcone_approach.LinAlg import angle_between
 from collections import deque
 from itertools import combinations

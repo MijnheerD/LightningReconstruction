@@ -26,7 +26,7 @@ zcut = z[selection]
 tcut = t[selection]
 
 # Make sure data is sorted by time
-START = np.argmax(ycut)
+START = np.argmax(tcut)
 search = Tracker(xcut, ycut, zcut, tcut, START, (1, 0), 700, direction=-1, max_points=200)
 search.run()
 

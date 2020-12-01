@@ -1,6 +1,7 @@
 from Lightcone_approach.LinAlg import angle_between
 from collections import deque
 from itertools import combinations
+from anytree import NodeMixin
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as col
@@ -10,7 +11,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 class Tracker:
     def __init__(self, x: np.ndarray, y: np.ndarray, z: np.ndarray, t: np.ndarray,
-                 seed, weights=(1, 0), d_cut=1000, direction=-1, max_points = 20):
+                 seed, weights=(1, 0), d_cut=1000, direction=-1, max_points=200):
         self.x = x
         self.y = y
         self.z = z
@@ -47,7 +48,7 @@ class Tracker:
         else:
             raise Exception("Unknown direction for search")
 
-        return selection*limit_d*limit_t
+        return selection * limit_d * limit_t
 
     def _distance_pair(self, p1, p2):
         """
@@ -98,6 +99,7 @@ class Tracker:
         :return:
         """
         self.search = False
+        seed_add = -1
 
         if self.direction == -1:
             index = 0
@@ -121,6 +123,10 @@ class Tracker:
                 seed_add = min(values, key=values.__getitem__)
                 self.pool.append(seed_add)
 
+        else:
+            raise ValueError('Direction not valid')
+
+        return seed_add
 
     def first_step(self):
         assert len(self.pool) == 1, "This is not the first step"
@@ -177,7 +183,7 @@ class Tracker:
         norm = col.Normalize(vmin=min(self.t), vmax=max(self.t))
         ax.scatter(self.x, self.y, self.z, marker='^', c=self.t, cmap=cmap, norm=norm, alpha=0.2)
         ax.plot(self.x[self.pool[0]], self.y[self.pool[0]], self.z[self.pool[0]],
-                   marker='o', c='lime', fillstyle='none')
+                marker='o', c='lime', fillstyle='none')
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
@@ -192,7 +198,7 @@ class Tracker:
 
         if self.direction == -1:
             ax.plot(self.x[self.pool[0]], self.y[self.pool[0]], self.z[self.pool[0]],
-                   marker='o', c='navy', fillstyle='none')
+                    marker='o', c='navy', fillstyle='none')
         elif self.direction == 1:
             ax.plot(self.x[self.pool[-1]], self.y[self.pool[-1]], self.z[self.pool[-1]],
                     marker='o', c='navy', fillstyle='none')
