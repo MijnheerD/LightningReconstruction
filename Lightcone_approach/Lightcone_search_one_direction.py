@@ -23,6 +23,10 @@ class Tracker:
         self.search = True
         self.max_points = max_points
 
+    def reset_to_seed(self, seed):
+        self.pool = deque([seed])
+        self.search = True
+
     def in_lightcone(self, p: int):
         """
         Check which points are within the lightcone of the current selected point and returns those that are close
@@ -168,7 +172,7 @@ class Tracker:
     def run(self):
         self.first_step()
         while self.search:
-            print(f'Still looping, already selected {len(self.pool) - 1} new points')
+            # print(f'Still looping, already selected {len(self.pool) - 1} new points')
             self.find_next()
             if len(self.pool) >= self.max_points:
                 break

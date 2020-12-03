@@ -24,15 +24,22 @@ class ListNode(list, NodeMixin):
         if children:
             self.children = children
 
+    def update(self, contents: list):
+        self.clear()
+        self.extend(contents)
+
 
 class Analyzer:
-    def __init__(self, x, y, z, t, seed, direction, weights=(1, 0), d_cut=700, max_points=200):
+    def __init__(self, x, y, z, t, direction, weights=(1, 0), d_cut=700, max_points=200):
         # Sort the data by time
         txyz = sorted(zip(t, x, y, z))
+        t_sorted, x_sorted, y_sorted, z_sorted = map(np.array, zip(*list(txyz)))
+        self.tracker = Tracker(x_sorted, y_sorted, z_sorted, t_sorted, -1, weights, d_cut, direction, max_points)
         self.sources = [Source(a, b, c, d, idx) for (d, a, b, c), idx in zip(txyz, range(len(txyz)))]
         self.direction = direction
         self.tree = ListNode('root')
         self.labelling = True
+        self.counter = 0
 
     def render_tree(self):
         for pre, _, node in RenderTree(self.tree):
@@ -41,26 +48,63 @@ class Analyzer:
 
     def first_branch(self):
         seed_source = self.sources[-1]
-        x = np.array([seed_source.position[0]])
-        y = np.array([seed_source.position[1]])
-        z = np.array([seed_source.position[2]])
-        t = np.array([seed_source.t])
-        for idx in range(2, 20):
-            pos = self.sources[-idx].position
-            x = np.append(pos[0], x)
-            y = np.append(pos[1], y)
-            z = np.append(pos[2], z)
-            t = np.append(self.sources[-idx].t, t)
 
-        search = Tracker(x, y, z, t, len(t)-1, direction=self.direction)
-        search.run()
+        self.tracker.reset_to_seed(seed_source.ID)
+        self.tracker.run()
 
-        pool = []
-        for i in search.pool:
-            idx_in_sources_list = i-len(t)+1
-            self.sources[idx_in_sources_list].selected = True
-            pool.append(idx_in_sources_list)
+        pool = list(self.tracker.pool)
         new_node = ListNode('n0', pool, parent=self.tree)
+        self.counter += 1
+        for idx in pool:
+            self.sources[idx].selected = True
+            self.sources[idx].branch = new_node
+
+    def insert_branch(self, branch: ListNode, insertion_id: int, leaf: list):
+        insertion_index = branch.index(insertion_id)
+        root = branch[:insertion_index + 1]
+        rest = branch[insertion_index + 1:]
+
+        branch.update(root)
+        insert_node = ListNode('n'+str(self.counter), leaf, parent=branch)
+        self.counter += 1
+        rest_node = ListNode('n'+str(self.counter), rest, parent=branch)
+        self.counter += 1
+
+    def merge_branch(self, branch: ListNode, new_part: list):
+        branch.extend(new_part)
+
+    def next_seed(self):
+        idx = -1
+        source = self.sources[idx]
+        while source.selected:
+            idx -= 1
+            source = self.sources[idx]
+        return source.ID
+
+    def find_next_branch(self):
+        self.labelling = False
+
+        seed_source = self.sources[self.next_seed()]
+        self.tracker.reset_to_seed(seed_source.ID)
+
+        # Run the tracker, but check in every step if we encounter an already selected source
+        self.tracker.first_step()
+        while self.tracker.search:
+            seed_added = self.tracker.find_next()
+            if self.sources[seed_added].selected or len(self.tracker.pool) > self.tracker.max_points:
+                break
+
+        pool = list(self.tracker.pool)
+        insertion_source = self.sources[seed_added]
+        if len(pool) > 10:
+            self.insert_branch(insertion_source.branch, seed_added, pool)
+            self.labelling = True
+        elif len(pool) > 0:
+            self.merge_branch(insertion_source.branch, pool)
+            self.labelling = True
 
     def label(self):
         self.first_branch()
+        while self.labelling:
+            self.render_tree()
+            self.find_next_branch()

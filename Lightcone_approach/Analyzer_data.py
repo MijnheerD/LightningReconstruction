@@ -1,8 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.colors as col
-import matplotlib.cm as cm
-from mpl_toolkits.mplot3d import Axes3D
 from Lightcone_approach.LightiningAnalyzer import Analyzer
 
 
@@ -25,6 +21,6 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-analyzer = Analyzer(xcut, ycut, zcut, tcut, 0, -1)
+analyzer = Analyzer(xcut, ycut, zcut, tcut, -1)
 analyzer.label()
 analyzer.render_tree()
