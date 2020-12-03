@@ -105,6 +105,13 @@ class Analyzer:
 
     def label(self):
         self.first_branch()
-        while self.labelling:
-            self.render_tree()
+        '''
+         i = 0        
+         while self.labelling:
             self.find_next_branch()
+            i += 1
+            if i > 10:
+                break
+            if self.counter >= 3:
+                break
+        '''

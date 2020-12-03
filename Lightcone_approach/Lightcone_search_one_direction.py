@@ -138,16 +138,16 @@ class Tracker:
         seed_x = self.x[self.pool[0]]
         seed_y = self.y[self.pool[0]]
         seed_z = self.z[self.pool[0]]
-        max_distance = 500
+        max_distance = 200
 
         neighbours = (self.x - seed_x) ** 2 + (self.y - seed_y) ** 2 + (self.z - seed_z) ** 2 <= max_distance
         indices = np.array(range(len(self.t)))
         indices_neighbours = indices[neighbours]
 
-        # Make sure to include at least 5 neighbouring points
-        while len(indices_neighbours) <= 4:
+        # Make sure to include at least 1 neighbouring point
+        while len(indices_neighbours) < 2 and max_distance <= self.distance_cutoff:
             max_distance += 100
-            neighbours = (self.x - seed_x) ** 2 + (self.y - seed_y) ** 2 + (self.z - seed_z) ** 2 <= max_distance
+            neighbours = (self.x - seed_x) ** 2 + (self.y - seed_y) ** 2 + (self.z - seed_z) ** 2 <= max_distance**2
             indices_neighbours = indices[neighbours]
 
         # Find the distance to each neighbour
@@ -157,17 +157,12 @@ class Tracker:
                 continue
             distances[index] = self._distance_pair(self.pool[0], index)
 
-        # Try to find the 2 closest neighbours which are almost anti-aligned
-        values = {}
-        for (index1, index2) in combinations(distances.keys(), 2):
-            total_dist = distances[index1] + distances[index2]
-            vel_comp = self._velocity_penalty((self.pool[0], index1), (self.pool[0], index2))
-            values[(index1, index2)] = total_dist / vel_comp
-
         # Find the minimum and append to pool
-        (start_left, start_right) = min(values, key=values.__getitem__)
-        self.pool.appendleft(start_left)
-        self.pool.append(start_right)
+        start = min(distances, key=distances.__getitem__)
+        if self.direction == -1:
+            self.pool.appendleft(start)
+        elif self.direction == 1:
+            self.pool.append(start)
 
     def run(self):
         self.first_step()
