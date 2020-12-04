@@ -26,8 +26,11 @@ zcut = z[selection]
 tcut = t[selection]
 
 # Make sure data is sorted by time
+txyz = sorted(zip(tcut, xcut, ycut, zcut))
+t_sorted, x_sorted, y_sorted, z_sorted = map(np.array, zip(*list(txyz)))
+
 START = np.argmax(tcut)
-search = Tracker(xcut, ycut, zcut, tcut, START, (1, 0), 700, direction=-1, max_points=200)
+search = Tracker(x_sorted, y_sorted, z_sorted, t_sorted, START, (1, 0), 700, direction=-1, max_points=200)
 search.run()
 
 fig = plt.figure(1, figsize=(10, 10))
