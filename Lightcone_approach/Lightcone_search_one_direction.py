@@ -1,12 +1,9 @@
 from Lightcone_approach.LinAlg import angle_between
 from collections import deque
-from itertools import combinations
-from anytree import NodeMixin
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as col
 import matplotlib.cm as cm
-from mpl_toolkits.mplot3d import Axes3D
 
 
 class Tracker:

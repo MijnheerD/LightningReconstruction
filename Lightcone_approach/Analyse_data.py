@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as col
 import matplotlib.cm as cm
-from mpl_toolkits.mplot3d import Axes3D
 from Lightcone_approach.Lightcone_search_one_direction import Tracker
 
 
@@ -29,7 +28,7 @@ tcut = t[selection]
 txyz = sorted(zip(tcut, xcut, ycut, zcut))
 t_sorted, x_sorted, y_sorted, z_sorted = map(np.array, zip(*list(txyz)))
 
-START = np.argmax(tcut)
+START = len(t_sorted) - 1
 search = Tracker(x_sorted, y_sorted, z_sorted, t_sorted, START, (1, 0), 700, direction=-1, max_points=200)
 search.run()
 
@@ -39,9 +38,9 @@ ax = fig.add_subplot(111, projection='3d')
 cmap = cm.plasma
 norm = col.Normalize(vmin=min(tcut), vmax=max(tcut))
 ax.scatter(xcut, ycut, zcut, marker='^', c=tcut, cmap=cmap, norm=norm)
-ax.plot([xcut[ind] for ind in search.pool], [ycut[ind] for ind in search.pool], [zcut[ind] for ind in search.pool],
-        marker='o', c='navy', fillstyle='none')
-ax.plot(xcut[START], ycut[START], zcut[START],
+ax.plot([x_sorted[ind] for ind in search.pool], [y_sorted[ind] for ind in search.pool],
+        [z_sorted[ind] for ind in search.pool], marker='o', c='navy', fillstyle='none')
+ax.plot(x_sorted[START], y_sorted[START], z_sorted[START],
         marker='o', c='lime', fillstyle='none')
 
 ax.set_xlabel('X')
