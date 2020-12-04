@@ -1,5 +1,5 @@
 """
-TODO: rewrite first_branch(), to make it search whole source space
+
 """
 
 from anytree import NodeMixin, RenderTree
@@ -12,7 +12,8 @@ import matplotlib.colors as mcolors
 import matplotlib.cm as cm
 
 
-LIST_OF_COLORS = ['#ffa372', '#ed6663', '#43658b', '#4e89ae', '#fa26a0', '#05dfd7', '#a3f7bf', '#fff591']
+LIST_OF_COLORS = ['#ffa372', '#fa163f', '#aa26da', '#43658b', '#898d90', '#fa26a0', '#05dfd7', '#a3f7bf',
+                  '#153e90', '#54e346', '#581845', '#825959', '#4e89ae', '#0e49b5', '#54e346', '#f1fa3c']
 
 
 class Source:
