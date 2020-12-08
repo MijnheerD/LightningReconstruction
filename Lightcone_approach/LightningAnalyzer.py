@@ -12,12 +12,20 @@ import matplotlib.colors as mcolors
 import matplotlib.cm as cm
 
 
-LIST_OF_COLORS = ['#ffa372', '#fa163f', '#aa26da', '#43658b', '#898d90', '#fa26a0', '#05dfd7', '#a3f7bf',
-                  '#153e90', '#54e346', '#581845', '#825959', '#4e89ae', '#0e49b5', '#54e346', '#f1fa3c']
+LIST_OF_COLORS = ['#153e90', '#54e346', '#581845', '#825959', '#0e49b5', '#89937f', '#f1fa3c', '#4e89ae',
+                  '#e28316', '#43658b', '#aa26da', '#fa163f', '#898d90', '#fa26a0', '#05dfd7', '#a3f7bf']
 
 
 class Source:
     def __init__(self, x, y, z, t, ID):
+        """
+        Wrapper for a lightning VHF source.
+        :param x: x-coordinate of the source.
+        :param y: y-coordinate of the source.
+        :param z: z-coordinate of the source.
+        :param t: t-coordinate of the source.
+        :param ID: Unique identifier of the source, for bookkeeping purposes.
+        """
         self.position = np.array([x, y, z])
         self.t = t
         self.ID = ID
@@ -27,6 +35,14 @@ class Source:
 
 class ListNode(list, NodeMixin):
     def __init__(self, name, lst=None, parent=None, children=None):
+        """
+        Custom node structure to collect all sources of a branch. Has all the functionality to be used with a tree data
+        structure.
+        :param name: Unique name of the node.
+        :param lst: List of the sources.
+        :param parent: Parent branch, must also be a ListNode.
+        :param children: Children branches, must also be ListNodes.
+        """
         if lst is None:
             lst = []
         super().__init__(lst)
@@ -41,8 +57,21 @@ class ListNode(list, NodeMixin):
 
 
 class Analyzer:
-    def __init__(self, x, y, z, t, direction, weights=(1, 0), d_cut=700, max_points=200, max_branch=100):
-        # Sort the data by time
+    def __init__(self, x, y, z, t, direction, weights=(1, 0), d_cut=700, max_points=1000, max_branch=100):
+        """
+        Class to analyze a lightning flash and divide the data into labelled branches. The result is stored inside a
+        tree structure, in which every node contains the list of identifiers of the sources inside that branch. Note
+        that the indices might not be sorted by time.
+        :param x: Array of the x-coordinates of the data to analyze.
+        :param y: Array of the y-coordinates of the data to analyze.
+        :param z: Array of the z-coordinates of the data to analyze.
+        :param t: Array of the t-coordinates of the data to analyze.
+        :param direction: Direction of time in which to search (-1: backwards, 1: forwards).
+        :param weights: Weights to be used in the search for the next point inside a branch.
+        :param d_cut: Max distance between points that can be connected inside the same branch.
+        :param max_points: Max number of points a branch can contain.
+        :param max_branch: Max number of branches the analyzer may label.
+        """
         txyz = sorted(zip(t, x, y, z))
         t_sorted, x_sorted, y_sorted, z_sorted = map(np.array, zip(*list(txyz)))
         self.tracker = Tracker(x_sorted, y_sorted, z_sorted, t_sorted, -1, weights, d_cut, direction, max_points)
@@ -55,6 +84,9 @@ class Analyzer:
         self.max_branch = max_branch
 
     def render_tree(self):
+        """
+        Render the internal tree
+        """
         for pre, _, node in RenderTree(self.tree):
             treestr = u"%s%s" % (pre, node.name)
             print(treestr.ljust(8), len(node))
@@ -139,13 +171,13 @@ class Analyzer:
             self.sources[idx].branch = branch
 
     def next_seed(self):
-        idx = -1
+        idx = self.direction
         source = self.sources[idx]
         while source.selected:
-            if idx == -len(self.sources):
+            if abs(idx) == len(self.sources):
                 self.labelling = False
                 return None
-            idx -= 1
+            idx += self.direction
             source = self.sources[idx]
         return source.ID
 
