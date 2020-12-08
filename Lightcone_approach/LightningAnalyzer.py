@@ -1,5 +1,5 @@
 """
-
+TODO: implement exception for lonely branches (with more than 1 source selected)
 """
 
 from anytree import NodeMixin, RenderTree
@@ -49,6 +49,7 @@ class Analyzer:
         self.sources = [Source(a, b, c, d, idx) for (d, a, b, c), idx in zip(txyz, range(len(txyz)))]
         self.direction = direction
         self.tree = ListNode('root')
+        self.lonely = ListNode('lonely')
         self.labelling = True
         self.counter = 0
         self.max_branch = max_branch
@@ -96,6 +97,9 @@ class Analyzer:
             ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
             counter += 1
 
+        ax2.scatter([x_plot[ind] for ind in self.lonely], [y_plot[ind] for ind in self.lonely],
+                    [z_plot[ind] for ind in self.lonely], color='k', marker='s')
+
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
 
@@ -129,7 +133,7 @@ class Analyzer:
             self.sources[idx].branch = rest_node
 
     def merge_branch(self, branch: ListNode, new_part: list):
-        branch.extend(new_part[:-1])
+        branch.extend(new_part)
         for idx in new_part:
             self.sources[idx].selected = True
             self.sources[idx].branch = branch
@@ -154,20 +158,34 @@ class Analyzer:
         self.tracker.reset_to_seed(seed_source.ID)
 
         # Run the tracker, but check in every step if we encounter an already selected source
-        self.tracker.first_step()
-        seed_added = -1
+        seed_added = self.tracker.first_step()
         while self.tracker.search:
-            seed_added = self.tracker.find_next()
             if self.sources[seed_added].selected or len(self.tracker.pool) > self.tracker.max_points:
                 break
+            seed_added = self.tracker.find_next()
 
         pool = list(self.tracker.pool)
+        if seed_added is None:
+            self.lonely.extend(pool)
+            for idx in pool:
+                self.sources[idx].selected = True
+                self.sources[idx].branch = self.lonely
+            return
+
         insertion_source = self.sources[seed_added]
+        # Pool most likely has an already selected source as its first/last element, depending on the direction
+        if self.direction == 1:
+            new_branch = pool[:-1]
+        elif self.direction == -1:
+            new_branch = pool[1:]
+        else:
+            raise ValueError('Direction is not valid')
+
         if len(pool) >= 10:
-            self.insert_branch(insertion_source.branch, seed_added, pool)
+            self.insert_branch(insertion_source.branch, seed_added, new_branch)
             self.labelling = True
         elif len(pool) > 0:
-            self.merge_branch(insertion_source.branch, pool)
+            self.merge_branch(insertion_source.branch, new_branch)
             self.labelling = True
         else:
             self.labelling = False

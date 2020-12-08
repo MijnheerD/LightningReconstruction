@@ -99,19 +99,18 @@ class Tracker:
         Finds next points at both begin and tail of the current researched branch.
         :return:
         """
-        self.search = False
-        seed_add = -1
-
         if self.direction == -1:
             index = 0
             prev = 1
 
             values = self._find_next(index, prev)
 
-            if len(values) != 0:
-                self.search = True
-                seed_add = min(values, key=values.__getitem__)
-                self.pool.appendleft(seed_add)
+            if len(values) == 0:
+                self.search = False
+                return
+
+            seed_add = min(values, key=values.__getitem__)
+            self.pool.appendleft(seed_add)
 
         elif self.direction == 1:
             index = -1
@@ -119,10 +118,12 @@ class Tracker:
 
             values = self._find_next(index, prev)
 
-            if len(values) != 0:
-                self.search = True
-                seed_add = min(values, key=values.__getitem__)
-                self.pool.append(seed_add)
+            if len(values) == 0:
+                self.search = False
+                return
+
+            seed_add = min(values, key=values.__getitem__)
+            self.pool.append(seed_add)
 
         else:
             raise ValueError('Direction not valid')
@@ -155,11 +156,16 @@ class Tracker:
             distances[index] = self._distance_pair(self.pool[0], index)
 
         # Find the minimum and append to pool
+        if len(distances) == 0:
+            return self.pool[0]
+
         start = min(distances, key=distances.__getitem__)
         if self.direction == -1:
             self.pool.appendleft(start)
         elif self.direction == 1:
             self.pool.append(start)
+
+        return start
 
     def run(self):
         self.first_step()

@@ -1,8 +1,8 @@
+"""
+The d_cut=400 seems to be the limit currently, to have a sensible result.
+"""
+
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.colors as col
-import matplotlib.cm as cm
-from mpl_toolkits.mplot3d import Axes3D
 from Lightcone_approach.LightningAnalyzer import Analyzer
 
 data = np.genfromtxt("data_test.txt", delimiter=",")
@@ -24,7 +24,7 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-analyzer = Analyzer(xcut, ycut, zcut, tcut, -1)
+analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, d_cut=400)
 analyzer.label()
 analyzer.render_tree()
 analyzer.save_tree_to_file('save_tree.txt')
