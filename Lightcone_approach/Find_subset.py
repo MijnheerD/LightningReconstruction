@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as col
 import matplotlib.cm as cm
-from mpl_toolkits.mplot3d import Axes3D
 
 
 data = np.genfromtxt("data_test.txt", delimiter=",")
@@ -11,12 +10,12 @@ y = data[:, 1]
 z = data[:, 2]
 t = data[:, 3]
 
-xmin = x > 3000
-xmax = x < 7000
-ymin = y > -8000
-ymax = y < -6000
-zmin = z > 5000
-zmax = z < 10000
+xmin = x > -4500
+xmax = x < -3000
+ymin = y > -8500
+ymax = y < -5000
+zmin = z > 3000
+zmax = z < 5000
 selection = zmin * zmax * xmin * xmax * ymin * ymax
 
 xcut = x[selection]

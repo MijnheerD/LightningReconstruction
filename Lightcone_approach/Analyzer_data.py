@@ -1,8 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.colors as col
-import matplotlib.cm as cm
-from mpl_toolkits.mplot3d import Axes3D
 from Lightcone_approach.LightningAnalyzer import Analyzer
 
 data = np.genfromtxt("data_test.txt", delimiter=",")
