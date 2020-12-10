@@ -22,4 +22,5 @@ tcut = t[selection]
 
 analyzer = Analyzer(xcut, ycut, zcut, tcut, -1)
 analyzer.label()
-analyzer.plot_tree()
+analyzer.render_tree()
+analyzer.save_tree_to_file('save_tree.txt')

@@ -3,6 +3,8 @@ TODO: rewrite first_branch(), to make it search whole source space
 """
 
 from anytree import NodeMixin, RenderTree
+from anytree.exporter.dictexporter import DictExporter
+from anytree.exporter.jsonexporter import JsonExporter
 from Lightcone_approach.Lightcone_search_one_direction import Tracker
 import numpy as np
 import matplotlib.pyplot as plt
@@ -90,6 +92,7 @@ class Analyzer:
             color = mcolors.hex2color(LIST_OF_COLORS[int(counter % len(LIST_OF_COLORS))])
             ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node], [z_plot[ind] for ind in node],
                         color=color, marker='o')
+            ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
             counter += 1
 
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
@@ -174,3 +177,11 @@ class Analyzer:
             self.find_next_branch()
             if self.counter >= self.max_branch:
                 break
+
+    def save_tree_to_file(self, file):
+        f = open(file, 'a')
+        exporter = DictExporter()
+        exporter = JsonExporter(dictexporter=exporter, indent=2)
+        exporter.write(self.tree.children[0], f)
+        f.write('\n')
+        f.close()
