@@ -1,0 +1,3 @@
+Analyzer took 1.2020397186279297 sec to search trough 602 points
+Analyzer took 2.708322286605835 sec to search trough 636 points
+Analyzer took 13.78610348701477 sec to search trough 2284 points

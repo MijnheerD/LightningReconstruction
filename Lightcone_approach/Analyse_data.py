@@ -5,7 +5,7 @@ import matplotlib.cm as cm
 from Lightcone_approach.Lightcone_search_one_direction import Tracker
 
 
-data = np.genfromtxt("data_test.txt", delimiter=",")
+data = np.genfromtxt("../Data/data_test.txt", delimiter=",")
 x = data[:, 0]
 y = data[:, 1]
 z = data[:, 2]

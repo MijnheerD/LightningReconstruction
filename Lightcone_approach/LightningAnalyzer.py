@@ -1,6 +1,4 @@
-"""
-TODO: implement exception for lonely branches (with more than 1 source selected)
-"""
+
 
 from anytree import NodeMixin, RenderTree
 from anytree.exporter.dictexporter import DictExporter
@@ -12,8 +10,9 @@ import matplotlib.colors as mcolors
 import matplotlib.cm as cm
 
 
-LIST_OF_COLORS = ['#153e90', '#54e346', '#581845', '#825959', '#0e49b5', '#89937f', '#f1fa3c', '#4e89ae',
-                  '#e28316', '#43658b', '#aa26da', '#fa163f', '#898d90', '#fa26a0', '#05dfd7', '#a3f7bf']
+LIST_OF_COLORS = ['#153e90', '#54e346', '#581845', '#825959', '#89937f', '#0e49b5', '#4e89ae', '#f1fa3c',
+                  '#e28316', '#43658b', '#aa26da', '#fa163f', '#898d90', '#fa26a0', '#05dfd7', '#a3f7bf',
+                  '#d68060', '#532e1c', '#59886b', '#db6400']
 
 
 class Source:
@@ -122,15 +121,19 @@ class Analyzer:
         ax2.set_zlim3d(left, right)
 
         counter = 0
-        for _, _, node in RenderTree(self.tree):
+        for _, _, node in RenderTree(self.tree.children[0]):
             color = mcolors.hex2color(LIST_OF_COLORS[int(counter % len(LIST_OF_COLORS))])
             ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node], [z_plot[ind] for ind in node],
                         color=color, marker='o')
             ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
             counter += 1
 
-        ax2.scatter([x_plot[ind] for ind in self.lonely], [y_plot[ind] for ind in self.lonely],
-                    [z_plot[ind] for ind in self.lonely], color='k', marker='s')
+        for _, _, node in RenderTree(self.lonely):
+            ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node],
+                        [z_plot[ind] for ind in node], color='k', marker='s')
+            if node.name == 'lonely':
+                continue
+            ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
 
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
@@ -154,15 +157,15 @@ class Analyzer:
         rest = branch[insertion_index + 1:]
 
         branch.update(root)
+        rest_node = ListNode('n' + str(self.counter), rest, parent=branch)
+        self.counter += 1
+        for idx in rest:
+            self.sources[idx].branch = rest_node
         insert_node = ListNode('n'+str(self.counter), leaf, parent=branch)
         self.counter += 1
         for idx in leaf:
             self.sources[idx].selected = True
             self.sources[idx].branch = insert_node
-        rest_node = ListNode('n'+str(self.counter), rest, parent=branch)
-        self.counter += 1
-        for idx in rest:
-            self.sources[idx].branch = rest_node
 
     def merge_branch(self, branch: ListNode, new_part: list):
         branch.extend(new_part)
@@ -198,10 +201,14 @@ class Analyzer:
 
         pool = list(self.tracker.pool)
         if seed_added is None:
-            self.lonely.extend(pool)
+            if len(pool) > 1:
+                node = ListNode('L', pool, parent=self.lonely)
+            else:
+                self.lonely.extend(pool)
+                node = self.lonely
             for idx in pool:
                 self.sources[idx].selected = True
-                self.sources[idx].branch = self.lonely
+                self.sources[idx].branch = node
             return
 
         insertion_source = self.sources[seed_added]

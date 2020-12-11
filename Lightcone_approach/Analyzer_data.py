@@ -1,24 +1,20 @@
 """
-The d_cut=400 seems to be the limit currently, to have a sensible result.
+The d_cut parameter is a fine-tuning parameter, that depends on the dataset considered.
+#1 : d_cut=400
+#2 : d_cut=1000
+#3 : d_cut=600
 """
 
 import numpy as np
 from Lightcone_approach.LightningAnalyzer import Analyzer
+from time import time
 
-data = np.genfromtxt("data_test.txt", delimiter=",")
+data = np.genfromtxt("../Data/data_test.txt", delimiter=",")
 x = data[:, 0]
 y = data[:, 1]
 z = data[:, 2]
 t = data[:, 3]
 
-'''
-xmin = x > 6000
-xmax = x < 9000
-ymin = y > -6000
-ymax = y < -3000
-zmin = z > 1500
-zmax = z < 5000
-'''
 xmin = x > 3000
 xmax = x < 7000
 ymin = y > -8000
@@ -32,7 +28,10 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, weights=(1, 0), d_cut=1000)
+analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, weights=(1, 0), d_cut=400)
+t1 = time()
 analyzer.label()
-analyzer.render_tree()
-analyzer.save_tree_to_file('save_tree.txt')
+t2 = time()
+print(f'Analyzer took {t2-t1} sec to search trough {len(tcut)} points', file=open('Timings.txt', 'a'))
+# analyzer.render_tree()
+# analyzer.plot_tree()

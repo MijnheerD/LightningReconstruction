@@ -4,7 +4,7 @@ import matplotlib.colors as col
 import matplotlib.cm as cm
 
 
-data = np.genfromtxt("data_test.txt", delimiter=",")
+data = np.genfromtxt("../Data/data_test.txt", delimiter=",")
 x = data[:, 0]
 y = data[:, 1]
 z = data[:, 2]
