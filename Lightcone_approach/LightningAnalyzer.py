@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.cm as cm
+import pickle
 
 
 LIST_OF_COLORS = ['#153e90', '#54e346', '#581845', '#825959', '#89937f', '#0e49b5', '#4e89ae', '#f1fa3c',
@@ -237,9 +238,9 @@ class Analyzer:
                 break
 
     def save_tree_to_file(self, file):
-        f = open(file, 'a')
-        exporter = DictExporter()
-        exporter = JsonExporter(dictexporter=exporter, indent=2)
-        exporter.write(self.tree.children[0], f)
-        f.write('\n')
-        f.close()
+        f = open('Pickle_saves/' + file, 'wb')
+        pickle.dump(self.tree, f)
+
+    def load_tree_from_file(self, file):
+        f = open('Pickle_saves/' + file, 'rb')
+        self.tree = pickle.load(f)

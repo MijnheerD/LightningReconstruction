@@ -7,9 +7,8 @@ The d_cut parameter is a fine-tuning parameter, that depends on the dataset cons
 
 import numpy as np
 from Lightcone_approach.LightningAnalyzer import Analyzer
-from time import time
 
-data = np.genfromtxt("../Data/data_test.txt", delimiter=",")
+data = np.genfromtxt("../Data/data.txt", delimiter=",")
 x = data[:, 0]
 y = data[:, 1]
 z = data[:, 2]
@@ -28,10 +27,8 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, weights=(1, 0), d_cut=400)
-t1 = time()
+analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, weights=(1, 0), d_cut=1000)
 analyzer.label()
-t2 = time()
-print(f'Analyzer took {t2-t1} sec to search trough {len(tcut)} points', file=open('Timings.txt', 'a'))
-# analyzer.render_tree()
+analyzer.render_tree()
 # analyzer.plot_tree()
+analyzer.save_tree_to_file("Data_subset_2.pickle")
