@@ -139,6 +139,22 @@ class Analyzer:
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
 
+    def identify_data(self):
+        fig, ax = plt.subplots(1, figsize=(10,5))
+
+        z_plot = self.tracker.z
+        t_plot = self.tracker.t
+
+        cmap = cm.plasma
+        norm = mcolors.Normalize(vmin=t_plot[0], vmax=t_plot[-1])
+
+        ax.scatter(t_plot, z_plot, marker='o', c=t_plot, cmap=cmap, norm=norm)
+        ax.set_xlabel('Time [s]')
+        ax.set_ylabel('Height [m]')
+
+        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
+        plt.show()
+
     def first_branch(self):
         seed_source = self.sources[-1]
 
