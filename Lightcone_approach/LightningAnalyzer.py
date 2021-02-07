@@ -1,15 +1,11 @@
-
-
 from anytree import NodeMixin, RenderTree
-from anytree.exporter.dictexporter import DictExporter
-from anytree.exporter.jsonexporter import JsonExporter
+from anytree.search import findall_by_attr
 from Lightcone_approach.Lightcone_search_one_direction import Tracker
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.cm as cm
 import pickle
-
 
 LIST_OF_COLORS = ['#153e90', '#54e346', '#581845', '#825959', '#89937f', '#0e49b5', '#4e89ae', '#f1fa3c',
                   '#e28316', '#43658b', '#aa26da', '#fa163f', '#898d90', '#fa26a0', '#05dfd7', '#a3f7bf',
@@ -139,16 +135,24 @@ class Analyzer:
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
 
-    def identify_data(self):
-        fig, ax = plt.subplots(1, figsize=(10,5))
+    def identify_data(self, branch=0):
+        fig, ax = plt.subplots(1, figsize=(10, 5))
 
         z_plot = self.tracker.z
         t_plot = self.tracker.t
 
-        cmap = cm.plasma
-        norm = mcolors.Normalize(vmin=t_plot[0], vmax=t_plot[-1])
+        if branch == 0:
+            z = z_plot
+            t = t_plot
+        else:
+            node = findall_by_attr(self.tree, 'n'+str(branch))
+            z = [z_plot[ind] for ind in node[0]]
+            t = [t_plot[ind] for ind in node[0]]
 
-        ax.scatter(t_plot, z_plot, marker='o', c=t_plot, cmap=cmap, norm=norm)
+        cmap = cm.plasma
+        norm = mcolors.Normalize(vmin=t[0], vmax=t[-1])
+
+        ax.scatter(t, z, marker='o', c=t, cmap=cmap, norm=norm)
         ax.set_xlabel('Time [s]')
         ax.set_ylabel('Height [m]')
 
@@ -178,7 +182,7 @@ class Analyzer:
         self.counter += 1
         for idx in rest:
             self.sources[idx].branch = rest_node
-        insert_node = ListNode('n'+str(self.counter), leaf, parent=branch)
+        insert_node = ListNode('n' + str(self.counter), leaf, parent=branch)
         self.counter += 1
         for idx in leaf:
             self.sources[idx].selected = True
