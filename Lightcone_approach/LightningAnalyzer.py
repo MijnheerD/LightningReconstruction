@@ -135,28 +135,99 @@ class Analyzer:
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
 
-    def identify_data(self, branch=0):
-        fig, ax = plt.subplots(1, figsize=(10, 5))
+    def plot_FT(self):
+        fig = plt.figure(2, figsize=(20, 10))
 
+        x_plot = self.tracker.x
+        y_plot = self.tracker.y
+        z_plot = self.tracker.z
+        t_plot = self.tracker.t
+
+        grid = np.array([t_plot, x_plot, y_plot, z_plot])
+        fgrid = np.fft.fftn(grid)
+        ft = fgrid[0, :]
+        fx = fgrid[1, :]
+        fy = fgrid[2, :]
+        fz = fgrid[3, :]
+
+        cmap = cm.plasma
+        norm = mcolors.Normalize(vmin=min(abs(ft)), vmax=max(abs(ft)))
+
+        ax1 = fig.add_subplot(121, projection='3d', xlim=[0, 1e5], ylim=[0, 5e4])
+        ax1.scatter(abs(fx), abs(fy), abs(fz), marker='^', c=abs(ft), cmap=cmap, norm=norm)
+        ax1.set_xlabel('X')
+        ax1.set_ylabel('Y')
+        ax1.set_zlabel('Z')
+        ax1.set_title('FT of the original data')
+
+        ax2 = fig.add_subplot(122, projection='3d', xlim=[0, 1e5], ylim=[0, 5e4])
+        ax2.set_xlabel('X')
+        ax2.set_ylabel('Y')
+        ax2.set_zlabel('Z')
+        ax2.set_title('FT of each branch')
+
+        counter = 0
+        for _, _, node in RenderTree(self.tree.children[0]):
+            color = mcolors.hex2color(LIST_OF_COLORS[int(counter % len(LIST_OF_COLORS))])
+            x = [x_plot[ind] for ind in node]
+            y = [y_plot[ind] for ind in node]
+            z = [z_plot[ind] for ind in node]
+            t = [t_plot[ind] for ind in node]
+
+            grid2 = np.array([t, x, y, z])
+            fgrid2 = np.fft.fftn(grid2)
+            ft2 = fgrid2[0, :]
+            fx2 = fgrid2[1, :]
+            fy2 = fgrid2[2, :]
+            fz2 = fgrid2[3, :]
+
+            ax2.scatter(abs(fx2), abs(fy2), abs(fz2), color=color, marker='o')
+            ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
+            counter += 1
+
+        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
+        plt.show()
+
+    def identify_data(self, branch=0):
+        x_plot = self.tracker.x
+        y_plot = self.tracker.y
         z_plot = self.tracker.z
         t_plot = self.tracker.t
 
         if branch == 0:
+            x = x_plot
+            y = y_plot
             z = z_plot
             t = t_plot
         else:
             node = findall_by_attr(self.tree, 'n'+str(branch))
+            x = [x_plot[ind] for ind in node[0]]
+            y = [y_plot[ind] for ind in node[0]]
             z = [z_plot[ind] for ind in node[0]]
             t = [t_plot[ind] for ind in node[0]]
 
         cmap = cm.plasma
         norm = mcolors.Normalize(vmin=t[0], vmax=t[-1])
 
-        ax.scatter(t, z, marker='o', c=t, cmap=cmap, norm=norm)
-        ax.set_xlabel('Time [s]')
-        ax.set_ylabel('Height [m]')
+        fig, ax = plt.subplots(2, 2, figsize=(10, 10))
 
-        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
+        ax[0, 0].scatter(t, z, marker='o', c=t, cmap=cmap, norm=norm)
+        ax[0, 0].set_xlabel('Time [s]')
+        ax[0, 0].set_ylabel('Height [m]')
+
+        ax[0, 1].scatter(x, y, marker='o', c=t, cmap=cmap, norm=norm)
+        ax[0, 1].set_xlabel('Easting [m]')
+        ax[0, 1].set_ylabel('Northing [m]')
+
+        ax[1, 0].scatter(t, x, marker='o', c=t, cmap=cmap, norm=norm)
+        ax[1, 0].set_xlabel('Time [s]')
+        ax[1, 0].set_ylabel('Easting [m]')
+
+        ax[1, 1].scatter(t, y, marker='o', c=t, cmap=cmap, norm=norm)
+        ax[1, 1].set_xlabel('Time [s]')
+        ax[1, 1].set_ylabel('Northing [m]')
+
+        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
         plt.show()
 
     def first_branch(self):
