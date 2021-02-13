@@ -96,7 +96,7 @@ class Tracker:
 
     def find_next(self):
         """
-        Finds next points at both begin and tail of the current researched branch.
+        Finds next points at either begin and tail of the current researched branch.
         :return:
         """
         if self.direction == -1:
