@@ -4,19 +4,21 @@ import matplotlib.colors as col
 import matplotlib.cm as cm
 
 
-data = np.genfromtxt("Data/data.txt", delimiter=",")
-x = data[:, 0]
-y = data[:, 1]
-z = data[:, 2]
-t = data[:, 3]
+data = np.genfromtxt("Data/Srcs18-oddSE.csv", comments='!', delimiter=",")
+x = data[:, 1]
+y = data[:, 2]
+z = data[:, 3]
+t = data[:, 4]
 
-xmin = x > 6000
-xmax = x < 9000
-ymin = y > -6000
-ymax = y < -3000
-zmin = z > 1500
-zmax = z < 5000
-selection = zmin * zmax * xmin * xmax * ymin * ymax
+xmin = x > -100000
+xmax = x < -35000
+ymin = y > 10000
+ymax = y < 100000
+zmin = z > 0
+zmax = z < 10000
+tmin = t > 1.14
+tmax = t < 1.18
+selection = zmin * zmax * xmin * xmax * tmin * tmax
 
 xcut = x[selection]
 ycut = y[selection]
@@ -28,14 +30,13 @@ ax = fig.add_subplot(121, projection='3d')
 ax2 = fig.add_subplot(122)
 
 cmap = cm.plasma
-norm = col.Normalize(vmin=min(tcut), vmax=max(tcut))
+norm = col.Normalize(vmin=min(t), vmax=max(t))
 
 ax.scatter(xcut, ycut, zcut, marker='o', c=tcut, cmap=cmap, norm=norm)
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
-ax.set_title('Overlap of the selection with the original data')
-
+ax.set_title('Selection of the data')
 
 ax2.scatter(tcut, zcut, marker='o', c=tcut, cmap=cmap, norm=norm)
 ax2.set_xlabel('Time [s]')
