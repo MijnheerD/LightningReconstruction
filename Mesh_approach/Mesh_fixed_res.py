@@ -109,7 +109,7 @@ class Space:
         ax2.set_xlabel('X')
         ax2.set_ylabel('Y')
         ax2.set_zlabel('Z')
-        ax2.set_title('Total number of filled voxels')
+        ax2.set_title('Centers of filled voxels')
         (left, right) = ax1.get_xlim3d()
         ax2.set_xlim3d(left, right)
         (left, right) = ax1.get_ylim3d()

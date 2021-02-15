@@ -20,5 +20,5 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-space = Space(tcut, xcut, ycut, zcut, 100)
+space = Space(tcut, xcut, ycut, zcut, 500)
 print(space.plot_split())
