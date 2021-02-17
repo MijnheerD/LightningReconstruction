@@ -39,7 +39,7 @@ class Space:
         result = []
         for i in range(len(x_list) - 1):
             min = self.x > x_list[i]
-            max = self.x < x_list[i+1]
+            max = self.x < x_list[i + 1]
             result.append(np.where(min * max)[0].tolist())
         return result
 
@@ -67,7 +67,7 @@ class Space:
         n = int(self.side / self.res)
         x, y, z = self._split_self()
 
-        points_in_block_n =[0]*ijk2n(n-1, n-1, n-1, n)
+        points_in_block_n = [0] * (ijk2n(n - 1, n - 1, n - 1, n) + 1)
         i, j, k = 0, 0, 0
         x_divided = self._split_x(x)
         for col in x_divided:
@@ -75,11 +75,11 @@ class Space:
             for row in y_divided:
                 z_divided = self._split_z(z, row)
                 for line in z_divided:
-                    points_in_block_n[ijk2n(i, j, k, n)-1] = line
+                    points_in_block_n[ijk2n(i, j, k, n)] = line
                     k += 1
-                j+= 1
+                j += 1
                 k = 0
-            i+=1
+            i += 1
             j = 0
             k = 0
 
@@ -104,7 +104,7 @@ class Space:
         ax1.scatter(self.x, self.y, self.z, marker='^', c=self.t, cmap=cmap, norm=norm)
 
         cmap2 = cm.summer
-        norm2 = mcolors.Normalize(vmin=0, vmax=len(self.t)/number)
+        norm2 = mcolors.Normalize(vmin=0, vmax=len(self.t) / number)
 
         ax2.set_xlabel('X')
         ax2.set_ylabel('Y')
@@ -123,10 +123,10 @@ class Space:
             if len(set) == 0:
                 pass
             else:
-                i, j, k = n2ijk(n+1, number)
-                x_plot = (x[i] + x[i+1]) / 2
-                y_plot = (y[j] + y[j+1]) / 2
-                z_plot = (z[k] + z[k+1]) / 2
+                i, j, k = n2ijk(n, number)
+                x_plot = (x[i] + x[i + 1]) / 2
+                y_plot = (y[j] + y[j + 1]) / 2
+                z_plot = (z[k] + z[k + 1]) / 2
                 ax2.scatter(x_plot, y_plot, z_plot, c=len(set), cmap=cmap2, norm=norm2)
 
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax1)
