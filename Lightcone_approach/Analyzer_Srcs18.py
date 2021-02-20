@@ -20,7 +20,5 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, weights=(1, 0), d_cut=400)
-analyzer.label()
-analyzer.render_tree()
-analyzer.plot_tree()
+analyzer = Analyzer(x, y, z, t, -1, weights=(1, 0), d_cut=400)
+analyzer.identify_data()

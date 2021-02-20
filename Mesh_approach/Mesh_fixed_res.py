@@ -38,18 +38,18 @@ class Space:
     def _split_x(self, x_list):
         result = []
         for i in range(len(x_list) - 1):
-            min = self.x > x_list[i]
-            max = self.x < x_list[i + 1]
-            result.append(np.where(min * max)[0].tolist())
+            min_list = self.x > x_list[i]
+            max_list = self.x < x_list[i + 1]
+            result.append(np.where(min_list * max_list)[0].tolist())
         return result
 
     def _split_y(self, y_list, selection):
         y_considered = [self.y[idx] for idx in selection]
         result = []
         for i in range(len(y_list) - 1):
-            min = y_considered > y_list[i]
-            max = y_considered < y_list[i + 1]
-            temp = np.where(min * max)[0]
+            min_list = y_considered > y_list[i]
+            max_list = y_considered < y_list[i + 1]
+            temp = np.where(min_list * max_list)[0]
             result.append([selection[idx] for idx in temp])
         return result
 
@@ -57,9 +57,9 @@ class Space:
         z_considered = [self.z[idx] for idx in selection]
         result = []
         for i in range(len(z_list) - 1):
-            min = z_considered > z_list[i]
-            max = z_considered < z_list[i + 1]
-            temp = np.where(min * max)[0]
+            min_list = z_considered > z_list[i]
+            max_list = z_considered < z_list[i + 1]
+            temp = np.where(min_list * max_list)[0]
             result.append([selection[idx] for idx in temp])
         return result
 
@@ -119,16 +119,109 @@ class Space:
         ax2.scatter(self.x, self.y, self.z, marker='x', c=self.t, cmap=cmap, norm=norm)
 
         for n in range(len(data)):
-            set = data[n]
-            if len(set) == 0:
+            block = data[n]
+            if len(block) == 0:
                 pass
             else:
                 i, j, k = n2ijk(n, number)
                 x_plot = (x[i] + x[i + 1]) / 2
                 y_plot = (y[j] + y[j + 1]) / 2
                 z_plot = (z[k] + z[k + 1]) / 2
-                ax2.scatter(x_plot, y_plot, z_plot, c=len(set), cmap=cmap2, norm=norm2)
+                ax2.scatter(x_plot, y_plot, z_plot, c=len(block), cmap=cmap2, norm=norm2)
 
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax1)
         fig.colorbar(cm.ScalarMappable(norm=norm2, cmap=cmap2), ax=ax2)
         plt.show()
+
+    def check_neighbours(self, data):
+        number = int(self.side / self.res)
+        max_n = ijk2n(number - 1, number - 1, number - 1, number)
+        not_yet = []
+        for k in range(number):
+            for j in range(number):
+                for i in range(number):
+                    n = ijk2n(i, j, k, number)
+                    neighbours = [ijk2n(i - 1, j - 1, k - 1, number), ijk2n(i - 1, j, k - 1, number),
+                                  ijk2n(i - 1, j + 1, k - 1, number),
+                                  ijk2n(i, j - 1, k - 1, number), ijk2n(i, j, k - 1, number),
+                                  ijk2n(i, j + 1, k - 1, number),
+                                  ijk2n(i + 1, j - 1, k - 1, number), ijk2n(i + 1, j, k - 1, number),
+                                  ijk2n(i + 1, j + 1, k - 1, number),
+
+                                  ijk2n(i - 1, j - 1, k, number), ijk2n(i - 1, j, k, number),
+                                  ijk2n(i - 1, j + 1, k, number),
+                                  ijk2n(i, j - 1, k, number), ijk2n(i, j + 1, k, number),
+                                  ijk2n(i + 1, j - 1, k, number), ijk2n(i + 1, j, k, number),
+                                  ijk2n(i + 1, j + 1, k, number),
+
+                                  ijk2n(i - 1, j - 1, k + 1, number), ijk2n(i - 1, j, k + 1, number),
+                                  ijk2n(i - 1, j + 1, k + 1, number),
+                                  ijk2n(i, j - 1, k + 1, number), ijk2n(i, j, k + 1, number),
+                                  ijk2n(i, j + 1, k + 1, number),
+                                  ijk2n(i + 1, j - 1, k + 1, number), ijk2n(i + 1, j, k + 1, number),
+                                  ijk2n(i + 1, j + 1, k + 1, number),
+                                  ]
+                    if len(data[n]) != 0:
+                        count = 0
+                        for neigh in neighbours:
+                            if neigh < 0 or neigh > max_n:
+                                pass
+                            else:
+                                if len(data[neigh]) != 0:
+                                    count += 1
+                        if count > 3:
+                            not_yet.append(n)
+        return not_yet
+
+    def check_lonely(self, data):
+        number = int(self.side / self.res)
+        max_n = ijk2n(number - 1, number - 1, number - 1, number)
+        not_yet = []
+        for k in range(number):
+            for j in range(number):
+                for i in range(number):
+                    n = ijk2n(i, j, k, number)
+                    neighbours = [ijk2n(i - 1, j - 1, k - 1, number), ijk2n(i - 1, j, k - 1, number),
+                                  ijk2n(i - 1, j + 1, k - 1, number),
+                                  ijk2n(i, j - 1, k - 1, number), ijk2n(i, j, k - 1, number),
+                                  ijk2n(i, j + 1, k - 1, number),
+                                  ijk2n(i + 1, j - 1, k - 1, number), ijk2n(i + 1, j, k - 1, number),
+                                  ijk2n(i + 1, j + 1, k - 1, number),
+
+                                  ijk2n(i - 1, j - 1, k, number), ijk2n(i - 1, j, k, number),
+                                  ijk2n(i - 1, j + 1, k, number),
+                                  ijk2n(i, j - 1, k, number), ijk2n(i, j + 1, k, number),
+                                  ijk2n(i + 1, j - 1, k, number), ijk2n(i + 1, j, k, number),
+                                  ijk2n(i + 1, j + 1, k, number),
+
+                                  ijk2n(i - 1, j - 1, k + 1, number), ijk2n(i - 1, j, k + 1, number),
+                                  ijk2n(i - 1, j + 1, k + 1, number),
+                                  ijk2n(i, j - 1, k + 1, number), ijk2n(i, j, k + 1, number),
+                                  ijk2n(i, j + 1, k + 1, number),
+                                  ijk2n(i + 1, j - 1, k + 1, number), ijk2n(i + 1, j, k + 1, number),
+                                  ijk2n(i + 1, j + 1, k + 1, number),
+                                  ]
+                    if len(data[n]) != 0:
+                        count = 0
+                        for neigh in neighbours:
+                            if neigh < 0 or neigh > max_n:
+                                pass
+                            else:
+                                if len(data[neigh]) != 0:
+                                    count += 1
+                        if count == 0:
+                            not_yet.append(n)
+
+        return not_yet
+
+
+class Analyzer:
+    def __init__(self, t, x, y, z, res=1000):
+        self.space = Space(t, x, y, z, res)
+        self.excluded = []
+        self.fixed = []
+        self.level = 0
+
+    def next_level(self):
+        self.level += 1
+        
