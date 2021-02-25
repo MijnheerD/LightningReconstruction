@@ -14,24 +14,26 @@ y = data[:, 1]
 z = data[:, 2]
 t = data[:, 3]
 
-xmin = x > 6000
-xmax = x < 9000
-ymin = y > -6000
-ymax = y < -3000
-zmin = z > 1500
-zmax = z < 5000
-selection = zmin * zmax * xmin * xmax * ymin * ymax
+xmin = x > 4000
+xmax = x < 10000
+ymin = y > -20000
+ymax = y < 0
+zmin = z > 0
+zmax = z < 3000
+tmin = t > 0.85
+tmax = t < 1
+selection = zmin * zmax * xmin * xmax * ymin * ymax * tmin * tmax
 
 xcut = x[selection]
 ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-analyzer = Analyzer(x, y, z, t, -1, weights=(1, 0), d_cut=400)
+analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, weights=(1, 0), d_cut=400)
 
-analyzer.label()
-# analyzer.identify_data()
+# analyzer.label()
+analyzer.identify_data()
 
-analyzer.render_tree()
+# analyzer.render_tree()
 # analyzer.plot_tree()
-analyzer.save_tree_to_file("Data.pickle")
+# analyzer.save_tree_to_file("Data.pickle")
