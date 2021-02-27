@@ -23,5 +23,5 @@ zcut = z[selection]
 tcut = t[selection]
 
 tree = Octree(tcut, xcut, ycut, zcut)
-tree.first_split()
+tree.refine()
 tree.plot()

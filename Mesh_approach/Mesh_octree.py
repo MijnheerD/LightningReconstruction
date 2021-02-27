@@ -1,5 +1,5 @@
 """
-TODO: content check is broken -> should not happen on the level of indices, but the data!
+
 """
 
 import numpy as np
@@ -30,8 +30,7 @@ class Voxel:
         self.parent = parent
         self.neighbours = []
         self.children = []
-
-        self._set_contents()
+        self.contents = np.array([])
 
     def remove_child(self, child):
         try:
@@ -39,23 +38,14 @@ class Voxel:
         except ValueError:
             print(f'The voxel{child} is not a child of {self}')
 
-    def _set_contents(self):
-        if self.parent is not None:
-            xmin = self.parent.contents > (self.center[0] - self.edge / 2)
-            xmax = self.parent.contents < (self.center[0] + self.edge / 2)
-
-            ymin = self.parent.contents > (self.center[1] - self.edge / 2)
-            ymax = self.parent.contents < (self.center[1] + self.edge / 2)
-
-            zmin = self.parent.contents > (self.center[2] - self.edge / 2)
-            zmax = self.parent.contents < (self.center[2] + self.edge / 2)
-
-            self.contents = self.parent.contents[xmin*xmax*ymin*ymax*zmin*zmax]
+    def _set_contents(self, contents=None):
+        if contents is not None:
+            self.contents = contents
         else:
-            self.contents = np.array([])
+            pass
 
     def _is_neighbour(self, other):
-        return (other.edge + self.edge) / np.sqrt(2) <= np.linalg.norm(other.center - self.center)
+        return (other.edge + self.edge) / np.sqrt(2) >= np.linalg.norm(other.center - self.center)
 
     def look_for_neighbours(self, possible_neighbours):
         for neighbour in possible_neighbours:
@@ -96,9 +86,24 @@ class Octree:
         longest_side = np.max([x.max() - x.min(), y.max() - y.min(), z.max() - z.min()])
 
         self.root = Voxel(center, longest_side)
-        self.root.contents = np.array(range(len(self.t)))
+        self.root._set_contents(np.array(range(len(self.t))))
 
         self.active_leaves = []
+
+    def set_contents(self, voxel: Voxel):
+        if voxel.parent is not None:
+            xmin = self.x[voxel.parent.contents] > (voxel.center[0] - voxel.edge / 2)
+            xmax = self.x[voxel.parent.contents] < (voxel.center[0] + voxel.edge / 2)
+
+            ymin = self.y[voxel.parent.contents] > (voxel.center[1] - voxel.edge / 2)
+            ymax = self.y[voxel.parent.contents] < (voxel.center[1] + voxel.edge / 2)
+
+            zmin = self.z[voxel.parent.contents] > (voxel.center[2] - voxel.edge / 2)
+            zmax = self.z[voxel.parent.contents] < (voxel.center[2] + voxel.edge / 2)
+
+            voxel._set_contents(voxel.parent.contents[xmin*xmax*ymin*ymax*zmin*zmax])
+        else:
+            voxel._set_contents()
 
     def count_neighbours(self):
         count = []
@@ -108,14 +113,19 @@ class Octree:
         return count
 
     def remove_empty_voxels(self):
+        active_leaves = []
         for leaf in self.active_leaves:
             if len(leaf.contents) == 0:
                 leaf.parent.remove_child(leaf)
-                self.active_leaves.remove(leaf)
+            else:
+                active_leaves.append(leaf)
+        self.active_leaves = active_leaves
 
     def first_split(self):
         children = self.root.split()
         self.active_leaves.extend(children)
+        for child in children:
+            self.set_contents(child)
 
         self.remove_empty_voxels()
         for leaf in self.active_leaves:
@@ -132,6 +142,8 @@ class Octree:
                 cont = True
                 children = self.active_leaves[ind].split()
                 new_leaves.extend(children)
+                for child in children:
+                    self.set_contents(child)
 
         self.active_leaves = new_leaves
 
