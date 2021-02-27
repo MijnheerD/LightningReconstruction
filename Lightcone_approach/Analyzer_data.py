@@ -27,11 +27,11 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-analyzer = Analyzer(x, y, z, t, -1, weights=(1, 0), d_cut=400)
+analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, weights=(1, 0), d_cut=400)
 
 analyzer.label()
 # analyzer.identify_data()
 
 analyzer.render_tree()
-# analyzer.plot_tree()
-analyzer.save_tree_to_file("Data.pickle")
+analyzer.plot_tree()
+# analyzer.save_tree_to_file("Data.pickle")

@@ -230,6 +230,14 @@ class Analyzer:
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
         plt.show()
 
+    def give_branch(self, branch):
+        node = findall_by_attr(self.tree, 'n' + str(branch))
+        x = [self.tracker.x[ind] for ind in node[0]]
+        y = [self.tracker.y[ind] for ind in node[0]]
+        z = [self.tracker.z[ind] for ind in node[0]]
+        t = [self.tracker.t[ind] for ind in node[0]]
+        return (t, x, y, z)
+
     def first_branch(self):
         seed_source = self.sources[-1]
 
