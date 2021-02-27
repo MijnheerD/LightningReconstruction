@@ -1,8 +1,26 @@
 """
-TODO: Implement add neighbour of voxel
+TODO: content check is broken -> should not happen on the level of indices, but the data!
 """
 
 import numpy as np
+import matplotlib.pyplot as plt
+from itertools import combinations, product
+
+
+def plot_cube(ax, center, side_length):
+    '''
+    From https://stackoverflow.com/questions/11140163/plotting-a-3d-cube-a-sphere-and-a-vector-in-matplotlib#11156353
+    :param ax:
+    :param center:
+    :param side_length:
+    :return:
+    '''
+    r_x = [center[0] - side_length / 2, center[0] + side_length / 2]
+    r_y = [center[1] - side_length / 2, center[1] + side_length / 2]
+    r_z = [center[2] - side_length / 2, center[2] + side_length / 2]
+    for s, e in combinations(np.array(list(product(r_x, r_y, r_z))), 2):
+        if side_length+0.0001 >= np.sum(np.abs(s - e)) >= side_length-0.0001:
+            ax.plot3D(*zip(s, e), color="b")
 
 
 class Voxel:
@@ -32,9 +50,9 @@ class Voxel:
             zmin = self.parent.contents > (self.center[2] - self.edge / 2)
             zmax = self.parent.contents < (self.center[2] + self.edge / 2)
 
-            self.contents = xmin*xmax*ymin*ymax*zmin*zmax
+            self.contents = self.parent.contents[xmin*xmax*ymin*ymax*zmin*zmax]
         else:
-            self.contents = []
+            self.contents = np.array([])
 
     def _is_neighbour(self, other):
         return (other.edge + self.edge) / np.sqrt(2) <= np.linalg.norm(other.center - self.center)
@@ -45,8 +63,13 @@ class Voxel:
                 if self._is_neighbour(neighbour):
                     self.neighbours.append(neighbour)
             else:
-                for child in neighbour.children:
-                    self.look_for_neighbours(child.neighbours)
+                self.look_for_neighbours(neighbour.children)
+
+    def set_neighbours(self):
+        self.neighbours.extend(self.parent.children)
+        self.neighbours.remove(self)
+
+        self.look_for_neighbours(self.parent.neighbours)
 
     def split(self):
         new_length = self.edge / 2
@@ -61,12 +84,6 @@ class Voxel:
             Voxel(self.center + np.array([-new_length / 2, new_length / 2, -new_length / 2]), new_length, parent=self),
             Voxel(self.center + np.array([-new_length / 2, -new_length / 2, -new_length / 2]), new_length, parent=self)]
 
-        for child in self.children:
-            child.neighbours.extend(self.children)
-            child.neighbours.remove(child)
-
-            child.look_for_neighbours(self.neighbours)
-
         return self.children
 
 
@@ -79,41 +96,44 @@ class Octree:
         longest_side = np.max([x.max() - x.min(), y.max() - y.min(), z.max() - z.min()])
 
         self.root = Voxel(center, longest_side)
-        self.root.contents = list(range(len(self.t)))
+        self.root.contents = np.array(range(len(self.t)))
 
-        self.leaves = []
+        self.active_leaves = []
 
     def count_neighbours(self):
         count = []
-        for voxel in self.leaves:
+        for voxel in self.active_leaves:
             count.append(len(voxel.neighbours))
 
         return count
 
     def remove_empty_voxels(self):
-        for leaf in self.leaves:
+        for leaf in self.active_leaves:
             if len(leaf.contents) == 0:
                 leaf.parent.remove_child(leaf)
-                self.leaves.remove(leaf)
-                del leaf
+                self.active_leaves.remove(leaf)
 
     def first_split(self):
         children = self.root.split()
-        self.leaves.extend(children)
+        self.active_leaves.extend(children)
+
         self.remove_empty_voxels()
+        for leaf in self.active_leaves:
+            leaf.set_neighbours()
 
     def refine_local(self):
         count = self.count_neighbours()
+        print(f'Counting is {count}')
         cont = False
         new_leaves = []
 
         for ind in range(len(count)):
             if count[ind] > 3:
                 cont = True
-                children = self.leaves[ind].split()
+                children = self.active_leaves[ind].split()
                 new_leaves.extend(children)
 
-        self.leaves = new_leaves
+        self.active_leaves = new_leaves
 
         return cont
 
@@ -123,4 +143,30 @@ class Octree:
         cont = True
         while cont:
             cont = self.refine_local()
+
             self.remove_empty_voxels()
+            for leaf in self.active_leaves:
+                leaf.set_neighbours()
+
+    def find_leaves(self, voxel):
+        leaves = []
+        for child in voxel.children:
+            if len(child.children) == 0:
+                leaves.append(child)
+            else:
+                leaves.extend(self.find_leaves(child))
+
+        return leaves
+
+    def plot(self):
+        leaves = self.find_leaves(self.root)
+
+        fig = plt.figure(1, figsize=(20, 10))
+        ax1 = fig.add_subplot(111, projection='3d')
+
+        ax1.scatter(self.x, self.y, self.z, marker='x', c=self.t)
+        for leaf in leaves:
+            # print(f"Leaf has its center at {leaf.center} with edge length {leaf.edge}")
+            plot_cube(ax1, leaf.center, leaf.edge)
+
+        plt.show()

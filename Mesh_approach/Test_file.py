@@ -1,5 +1,6 @@
 import numpy as np
-from Mesh_approach.Mesh_fixed_res import Space
+import matplotlib.pyplot as plt
+from Mesh_approach.Mesh_fixed_res import Analyzer
 
 data = np.genfromtxt("../Data/data.txt", delimiter=",")
 x = data[:, 0]
@@ -21,6 +22,16 @@ zcut = z[selection]
 tcut = t[selection]
 
 
-resolution = 100
-space = Space(tcut, xcut, ycut, zcut, resolution)
-space.plot_split()
+resolution = 1000
+# space = Space(tcut, xcut, ycut, zcut, resolution)
+# space.plot_split()
+
+analyzer = Analyzer(tcut, xcut, ycut, zcut, resolution)
+coarse, fine = analyzer.run()
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.plot(coarse, label='Coarse')
+ax.plot(fine, label='Fine')
+ax.legend()
+plt.show()

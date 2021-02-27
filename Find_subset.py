@@ -10,10 +10,10 @@ y = data[:, 1]
 z = data[:, 2]
 t = data[:, 3]
 
-xmin = x > 4000
+xmin = x > 6000
 xmax = x < 10000
-ymin = y > -20000
-ymax = y < 0
+ymin = y > -7000
+ymax = y < -6000
 zmin = z > 0
 zmax = z < 3000
 tmin = t > 0.85

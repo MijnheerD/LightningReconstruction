@@ -133,14 +133,45 @@ class Space:
         fig.colorbar(cm.ScalarMappable(norm=norm2, cmap=cmap2), ax=ax2)
         plt.show()
 
+
+
+
+class Analyzer:
+    def __init__(self, t, x, y, z, res=1000):
+        self.space = Space(t, x, y, z, res)
+        self.n = int(self.space.side / self.space.res)
+        self.excluded = []
+        self.fixed = []
+        self.level = 0
+
+    def next_level(self):
+        self.level += 1
+        self.space.res = self.space.res / 2
+
+        # Every cell is split into 8 parts, so excluded cells can be mapped to lower res via their indices
+        excluded = []
+        for ind in self.excluded:
+            excluded.append(2 * ind)
+            excluded.append(2 * ind + 1)
+            excluded.append(2 * ind + self.n)
+            excluded.append(2 * ind + self.n**2)
+            excluded.append(2 * ind + 1 + self.n)
+            excluded.append(2 * ind + 1 + self.n**2)
+            excluded.append(2 * ind + self.n + self.n**2)
+            excluded.append(2 * ind + 1 + self.n + self.n**2)
+
     def check_neighbours(self, data):
-        number = int(self.side / self.res)
+        number = self.n
         max_n = ijk2n(number - 1, number - 1, number - 1, number)
         not_yet = []
         for k in range(number):
             for j in range(number):
                 for i in range(number):
                     n = ijk2n(i, j, k, number)
+
+                    if n in self.excluded:
+                        pass
+
                     neighbours = [ijk2n(i - 1, j - 1, k - 1, number), ijk2n(i - 1, j, k - 1, number),
                                   ijk2n(i - 1, j + 1, k - 1, number),
                                   ijk2n(i, j - 1, k - 1, number), ijk2n(i, j, k - 1, number),
@@ -161,6 +192,7 @@ class Space:
                                   ijk2n(i + 1, j - 1, k + 1, number), ijk2n(i + 1, j, k + 1, number),
                                   ijk2n(i + 1, j + 1, k + 1, number),
                                   ]
+
                     if len(data[n]) != 0:
                         count = 0
                         for neigh in neighbours:
@@ -171,16 +203,21 @@ class Space:
                                     count += 1
                         if count > 3:
                             not_yet.append(n)
+
         return not_yet
 
     def check_lonely(self, data):
         number = int(self.side / self.res)
         max_n = ijk2n(number - 1, number - 1, number - 1, number)
-        not_yet = []
+        lonely = []
         for k in range(number):
             for j in range(number):
                 for i in range(number):
                     n = ijk2n(i, j, k, number)
+
+                    if n in self.excluded:
+                        pass
+
                     neighbours = [ijk2n(i - 1, j - 1, k - 1, number), ijk2n(i - 1, j, k - 1, number),
                                   ijk2n(i - 1, j + 1, k - 1, number),
                                   ijk2n(i, j - 1, k - 1, number), ijk2n(i, j, k - 1, number),
@@ -201,6 +238,7 @@ class Space:
                                   ijk2n(i + 1, j - 1, k + 1, number), ijk2n(i + 1, j, k + 1, number),
                                   ijk2n(i + 1, j + 1, k + 1, number),
                                   ]
+
                     if len(data[n]) != 0:
                         count = 0
                         for neigh in neighbours:
@@ -210,18 +248,23 @@ class Space:
                                 if len(data[neigh]) != 0:
                                     count += 1
                         if count == 0:
-                            not_yet.append(n)
+                            lonely.append(n)
 
-        return not_yet
+        return lonely
 
+    def run(self):
+        data = self.space.split()
+        neighbours = self.check_neighbours(data)
+        lonely = self.check_lonely(data)
+        coarse = []
+        fine = []
+        for _ in range(10):
+            print(f"Neighbours has {len(neighbours)} elements and lonely has {len(lonely)} elements")
+            self.next_level()
+            data = self.space.split()
+            neighbours = self.check_neighbours(data)
+            coarse.append(len(neighbours))
+            lonely = self.check_lonely(data)
+            fine.append(len(lonely))
 
-class Analyzer:
-    def __init__(self, t, x, y, z, res=1000):
-        self.space = Space(t, x, y, z, res)
-        self.excluded = []
-        self.fixed = []
-        self.level = 0
-
-    def next_level(self):
-        self.level += 1
-        
+        return coarse, fine
