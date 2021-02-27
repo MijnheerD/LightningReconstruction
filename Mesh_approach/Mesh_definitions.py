@@ -113,10 +113,3 @@ class Voxel:
         for neighbour in self.neighbours:
             if neighbour is not None:
                 neighbour.remove_neighbour(self)
-
-
-class Space:
-    def __init__(self, t, x, y , z):
-        txyz = sorted(zip(t, x, y, z))
-        self.t, self.x, self.y, self.z = map(np.array, zip(*list(txyz)))
-        self.centre = np.array([(x.min + x.max) / 2, (y.min + y.max) / 2, (z.min + z.max) / 2])
