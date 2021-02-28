@@ -1,20 +1,25 @@
 """
-
+TODO: find solution for lonely points which get their own voxel
+TODO: implement extra conditions for splitting
+TODO: implement tree structure to print/save
+TODO: make general Analyzer class to inherit from (make full code packable)
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+import matplotlib.cm as cm
 from itertools import combinations, product
 
 
 def plot_cube(ax, center, side_length):
-    '''
+    """
     From https://stackoverflow.com/questions/11140163/plotting-a-3d-cube-a-sphere-and-a-vector-in-matplotlib#11156353
     :param ax:
     :param center:
     :param side_length:
     :return:
-    '''
+    """
     r_x = [center[0] - side_length / 2, center[0] + side_length / 2]
     r_y = [center[1] - side_length / 2, center[1] + side_length / 2]
     r_z = [center[2] - side_length / 2, center[2] + side_length / 2]
@@ -38,7 +43,7 @@ class Voxel:
         except ValueError:
             print(f'The voxel{child} is not a child of {self}')
 
-    def _set_contents(self, contents=None):
+    def set_contents(self, contents=None):
         if contents is not None:
             self.contents = contents
         else:
@@ -86,7 +91,7 @@ class Octree:
         longest_side = np.max([x.max() - x.min(), y.max() - y.min(), z.max() - z.min()])
 
         self.root = Voxel(center, longest_side)
-        self.root._set_contents(np.array(range(len(self.t))))
+        self.root.set_contents(np.array(range(len(self.t))))
 
         self.active_leaves = []
 
@@ -101,9 +106,9 @@ class Octree:
             zmin = self.z[voxel.parent.contents] > (voxel.center[2] - voxel.edge / 2)
             zmax = self.z[voxel.parent.contents] < (voxel.center[2] + voxel.edge / 2)
 
-            voxel._set_contents(voxel.parent.contents[xmin*xmax*ymin*ymax*zmin*zmax])
+            voxel.set_contents(voxel.parent.contents[xmin*xmax*ymin*ymax*zmin*zmax])
         else:
-            voxel._set_contents()
+            voxel.set_contents()
 
     def count_neighbours(self):
         count = []
@@ -176,9 +181,17 @@ class Octree:
         fig = plt.figure(1, figsize=(20, 10))
         ax1 = fig.add_subplot(111, projection='3d')
 
-        ax1.scatter(self.x, self.y, self.z, marker='x', c=self.t)
+        cmap = cm.plasma
+        norm = mcolors.Normalize(vmin=self.t.min(), vmax=self.t.max())
+
+        ax1.scatter(self.x, self.y, self.z, marker='x', c=self.t, cmap=cmap, norm=norm)
+        ax1.set_xlabel('X')
+        ax1.set_ylabel('Y')
+        ax1.set_zlabel('Z')
+        ax1.set_title('Voxels tracing the lightning signal')
         for leaf in leaves:
             # print(f"Leaf has its center at {leaf.center} with edge length {leaf.edge}")
             plot_cube(ax1, leaf.center, leaf.edge)
 
+        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
