@@ -1,6 +1,6 @@
 """
 TODO: find solution for lonely points which get their own voxel
-TODO: implement extra conditions for splitting
+TODO: recover branches from final voxel configuration
 TODO: implement tree structure to print/save
 TODO: make general Analyzer class to inherit from (make full code packable)
 """
@@ -36,6 +36,8 @@ class Voxel:
         self.neighbours = []
         self.children = []
         self.contents = np.array([])
+        self.active = True
+        self.label = None
 
     def remove_child(self, child):
         try:
@@ -48,6 +50,48 @@ class Voxel:
             self.contents = contents
         else:
             pass
+
+    def set_label(self, modifier=0):
+        """
+        Set the label of the voxel.
+        0 = split should be reverted
+        1 = Endpoint
+        2 = Branch
+        3 = BP
+        """
+        if (len(self.neighbours) - modifier) < 4:
+            self.label = len(self.neighbours)
+
+    def check_neighbours(self):
+        fake = 0
+        for neighbour in self.neighbours:
+            count = 0
+            for nn in neighbour.neighbours:
+                if nn not in self.neighbours:
+                    count += 1
+            if count == 0:
+                fake += 1
+        return fake
+
+    def check_parent_relation(self):
+        if self.label == 1:
+            if self.parent.label != 1:
+                return self
+
+        if self.parent.label == 2:
+            if self.label == 2:
+                self.active = False
+            elif self.label == 3:
+                fake = self.check_neighbours()
+                self.set_label(fake)
+                self.check_parent_relation()
+
+        if self.label is None:
+            fake = self.check_neighbours()
+            self.set_label(fake)
+            self.check_parent_relation()
+
+        return None
 
     def _is_neighbour(self, other):
         return (other.edge + self.edge) / np.sqrt(2) >= np.linalg.norm(other.center - self.center)
@@ -68,6 +112,7 @@ class Voxel:
 
     def split(self):
         new_length = self.edge / 2
+        self.active = False
 
         self.children = [
             Voxel(self.center + np.array([new_length / 2, new_length / 2, new_length / 2]), new_length, parent=self),
@@ -114,56 +159,78 @@ class Octree:
         count = []
         for voxel in self.active_leaves:
             count.append(len(voxel.neighbours))
-
-        return count
+        print(count)
 
     def remove_empty_voxels(self):
         active_leaves = []
         for leaf in self.active_leaves:
             if len(leaf.contents) == 0:
                 leaf.parent.remove_child(leaf)
+                leaf.active = False
             else:
                 active_leaves.append(leaf)
         self.active_leaves = active_leaves
+
+    def split_active(self):
+        """
+        Split all the active voxels, with an extra check if they are active (should be able to ommit).
+        """
+        new_leaves = []
+        for ind in range(len(self.active_leaves)):
+            if self.active_leaves[ind].active:
+                children = self.active_leaves[ind].split()
+                new_leaves.extend(children)
+        self.active_leaves = new_leaves
+
+    def revert_split(self, parent: Voxel):
+        parent.active = False
+        for child in parent.children:
+            child.parent = None
+            self.active_leaves.remove(child)
+        parent.children = []
 
     def first_split(self):
         children = self.root.split()
         self.active_leaves.extend(children)
         for child in children:
             self.set_contents(child)
+            child.label = 1
 
         self.remove_empty_voxels()
         for leaf in self.active_leaves:
             leaf.set_neighbours()
 
-    def refine_local(self):
-        count = self.count_neighbours()
-        print(f'Counting is {count}')
-        cont = False
-        new_leaves = []
-
-        for ind in range(len(count)):
-            if count[ind] > 3:
-                cont = True
-                children = self.active_leaves[ind].split()
-                new_leaves.extend(children)
-                for child in children:
-                    self.set_contents(child)
-
-        self.active_leaves = new_leaves
-
-        return cont
-
     def refine(self):
         self.first_split()
 
-        cont = True
-        while cont:
-            cont = self.refine_local()
+        while len(self.active_leaves) > 0:
+            # Print the number of neighbours of current active leaves
+            self.count_neighbours()
 
+            # Split every active voxel into 8 parts
+            self.split_active()
+
+            # Remove the empty voxels from the list
             self.remove_empty_voxels()
+
+            # Set the neighbours for every voxel which is not empty and label them accordingly
+            revert_parents = set()
             for leaf in self.active_leaves:
                 leaf.set_neighbours()
+                leaf.set_label()
+                if leaf.label == 0:
+                    revert_parents.add(leaf.parent)
+
+            # Check if the voxels are still active: check neighbours and revert split if voxel is disconnected
+            for parent in revert_parents:
+                self.revert_split(parent)
+
+            # Check if the voxels are still active: check relation with parent
+            revert_parents.clear()
+            for voxel in self.active_leaves:
+                result = voxel.check_parent_relation()
+                if result is not None:
+                    revert_parents.add(result.parent)
 
     def find_leaves(self, voxel):
         leaves = []
