@@ -1,5 +1,5 @@
 from numpy import genfromtxt
-from Mesh_approach.Mesh_octree import Octree, Analyzer
+from Mesh_approach.Mesh_octree import Analyzer
 
 data = genfromtxt("../Data/data.txt", delimiter=",")
 x = data[:, 0]
@@ -21,5 +21,8 @@ zcut = z[selection]
 tcut = t[selection]
 
 tree = Analyzer(tcut, xcut, ycut, zcut)
-tree.label()
-tree.plot_tree()
+tree.octree.refine()
+tree.octree.plot()
+
+# tree.label()
+# tree.plot_tree()
