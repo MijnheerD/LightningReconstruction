@@ -10,13 +10,10 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.cm as cm
 from itertools import combinations, product
-from Lightcone_approach.LightningAnalyzer import ListNode
 from anytree import RenderTree
 
+from Analyzer_template import LightningReconstructor, ListNode, LIST_OF_COLORS
 MAX_POINTS_PER_VOXEL = 10
-LIST_OF_COLORS = ['#153e90', '#54e346', '#581845', '#825959', '#89937f', '#0e49b5', '#4e89ae', '#f1fa3c',
-                  '#e28316', '#43658b', '#aa26da', '#fa163f', '#898d90', '#fa26a0', '#05dfd7', '#a3f7bf',
-                  '#d68060', '#532e1c', '#59886b', '#db6400']
 
 
 def plot_cube(ax, center, side_length, color="b"):
@@ -313,10 +310,13 @@ class Octree:
         ax1.set_zlabel('Z')
         ax1.set_title('Voxels tracing the lightning signal')
         for leaf in leaves:
-            # print(f"Leaf has its center at {leaf.center} with edge length {leaf.edge}")
             if leaf == self.earliest_voxel:
                 print(f"Earliest leaf has its center at {leaf.center} with edge length {leaf.edge}")
                 plot_cube(ax1, leaf.center, leaf.edge, color="r")
+            elif len(leaf.neighbours) == 1:
+                plot_cube(ax1, leaf.center, leaf.edge, color="r")
+            elif len(leaf.neighbours) == 3:
+                plot_cube(ax1, leaf.center, leaf.edge, color="g")
             else:
                 plot_cube(ax1, leaf.center, leaf.edge)
 
@@ -324,14 +324,43 @@ class Octree:
         plt.show()
 
 
-class Analyzer:
+class Analyzer (LightningReconstructor):
     def __init__(self, t, x, y, z, max_branch=100):
+        super().__init__()
+
         self.octree = Octree(t, x, y, z)
-        self.tree = ListNode('root')
-        self.lonely = ListNode('lonely')
         self.labelling = True
         self.counter = 0
         self.max_branch = max_branch
+
+    def plot_tree(self):
+        x_plot = self.octree.x
+        y_plot = self.octree.y
+        z_plot = self.octree.z
+        t_plot = self.octree.t
+
+        super()._plot_tree(t_plot, x_plot, y_plot, z_plot)
+
+    def plot_FT(self):
+        x_plot = self.octree.x
+        y_plot = self.octree.y
+        z_plot = self.octree.z
+        t_plot = self.octree.t
+
+        super()._plot_FT(t_plot, x_plot, y_plot, z_plot)
+
+    def identify_data(self, branch=0):
+        x_plot = self.octree.x
+        y_plot = self.octree.y
+        z_plot = self.octree.z
+        t_plot = self.octree.t
+
+        super()._identify_data(t_plot, x_plot, y_plot, z_plot, branch)
+
+    def line_plot(self):
+        t_plot = self.octree.t
+
+        super()._line_plot(t_plot)
 
     def find_earliest_voxel(self):
         leaves = self.octree.find_leaves(self.octree.root)
@@ -385,8 +414,8 @@ class Analyzer:
     def label(self):
         self.octree.refine()
         start = self.find_earliest_voxel()
-        # if start.label is not 1:
-        #     raise Exception("Must start from an endpoint")
+        if start.label != 1:
+            raise Exception("Must start from an endpoint")
 
         start.selected = True
         pool, BP = self.find_branch(start)
@@ -395,51 +424,3 @@ class Analyzer:
 
         if BP is not None:
             self.insert_branch(BP, new_node)
-
-    def plot_tree(self):
-        fig = plt.figure(1, figsize=(20, 10))
-
-        x_plot = self.octree.x
-        y_plot = self.octree.y
-        z_plot = self.octree.z
-        t_plot = self.octree.t
-
-        cmap = cm.plasma
-        norm = mcolors.Normalize(vmin=t_plot[0], vmax=t_plot[-1])
-
-        ax1 = fig.add_subplot(121, projection='3d')
-        ax1.scatter(x_plot, y_plot, z_plot, marker='^', c=t_plot, cmap=cmap, norm=norm)
-        ax1.set_xlabel('X')
-        ax1.set_ylabel('Y')
-        ax1.set_zlabel('Z')
-        ax1.set_title('Time ordered original data')
-
-        ax2 = fig.add_subplot(122, projection='3d')
-        ax2.set_xlabel('X')
-        ax2.set_ylabel('Y')
-        ax2.set_zlabel('Z')
-        ax2.set_title('Branches selected by the algorithm')
-        (left, right) = ax1.get_xlim3d()
-        ax2.set_xlim3d(left, right)
-        (left, right) = ax1.get_ylim3d()
-        ax2.set_ylim3d(left, right)
-        (left, right) = ax1.get_zlim3d()
-        ax2.set_zlim3d(left, right)
-
-        counter = 0
-        for _, _, node in RenderTree(self.tree.children[0]):
-            color = mcolors.hex2color(LIST_OF_COLORS[int(counter % len(LIST_OF_COLORS))])
-            ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node], [z_plot[ind] for ind in node],
-                        color=color, marker='o')
-            ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
-            counter += 1
-
-        for _, _, node in RenderTree(self.lonely):
-            ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node],
-                        [z_plot[ind] for ind in node], color='k', marker='s')
-            if node.name == 'lonely':
-                continue
-            ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
-
-        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
-        plt.show()
