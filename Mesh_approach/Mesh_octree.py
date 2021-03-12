@@ -13,6 +13,7 @@ from itertools import combinations, product
 from anytree import RenderTree
 
 from Analyzer_template import LightningReconstructor, ListNode, LIST_OF_COLORS
+MAX_POINTS_PER_VOXEL = 10
 
 
 def plot_cube(ax, center, side_length, color="b"):
@@ -129,6 +130,23 @@ class Voxel:
         except ValueError:
             print(f'The voxel{child} is not a child of {self}')
 
+    def force_endpoint(self):
+        # Find the child with the least amount of neighbours
+        number = [len(child.neighbours) for child in self.children]
+        ind = number.index(min(number))
+
+        # Find the closest neighbour to that child
+        distance_to_neigh = []
+        for neighbour in self.children[ind].neighbours:
+            distance_to_neigh.append(np.linalg.norm(neighbour.center - self.center))
+        n_ind = distance_to_neigh.index(min(distance_to_neigh))
+
+        # Make the selected child an endpoint with the closest neighbour as its only neighbour
+        self.children[ind].label = 1
+        self.children[ind].neighbours = [self.children[ind].neighbours[n_ind]]
+
+        return self.children[ind]
+
 
 class Octree:
     def __init__(self, t, x, y, z):
@@ -142,6 +160,7 @@ class Octree:
         self.root.set_contents(np.array(range(len(self.t))))
 
         self.active_leaves = []
+        self.endpoints = []
         self.earliest_voxel = self.root
 
     def set_voxel_contents(self, voxel: Voxel):
@@ -207,6 +226,7 @@ class Octree:
             child.label = 1
 
         self.remove_empty_voxels()
+        self.endpoints = self.active_leaves
         for leaf in self.active_leaves:
             leaf.set_neighbours()
 
@@ -214,6 +234,7 @@ class Octree:
         self.first_split()
 
         while len(self.active_leaves) > 0:
+            new_endpoints = []
             # Print the number of neighbours of current active leaves
             self.count_neighbours()
 
@@ -233,21 +254,33 @@ class Octree:
                 leaf.set_label()
                 if leaf.label == 0:
                     revert_parents.add(leaf.parent)
+                elif leaf.label == 1:
+                    new_endpoints.append(leaf)
 
             # Check if the voxels are still active: check neighbours and revert split if voxel is disconnected
             for parent in revert_parents:
                 self.revert_split(parent)
+
+            # Check if every previous endpoints still have an endpoint child
+            for end in self.endpoints:
+                labels = [child.label for child in end.children]
+                if len(labels) > 0 and 1 not in labels:
+                    new_endpoints.append(end.force_endpoint())
 
             # Check if the voxels are still active: check relation with parent
             revert_parents.clear()
             for voxel in self.active_leaves:
                 result = voxel.check_parent_relation()
                 if result is not None:
+                    new_endpoints.remove(result)
                     revert_parents.add(result.parent)
 
             # Revert split if voxel is in an impossible situation
             for parent in revert_parents:
                 self.revert_split(parent)
+
+            # Update list of endpoints
+            self.endpoints = new_endpoints
 
     def find_leaves(self, voxel: Voxel):
         """
@@ -336,14 +369,14 @@ class Analyzer (LightningReconstructor):
                 return leaf
 
     def find_next_voxel(self, voxel: Voxel):
-        start_time = self.octree.t[voxel.contents[-1]]
+        start_time = voxel.contents[-1]
 
         next_counter = 0
         nextBP = voxel.neighbours[next_counter]
-        while nextBP.selected or (self.octree.t[nextBP.contents[0]] > start_time):
+        while nextBP.selected or (nextBP.contents[0] < start_time):
             next_counter += 1
             nextBP = voxel.neighbours[next_counter]
-            if next_counter == 3:
+            if next_counter == 2:
                 return None
 
         return nextBP
