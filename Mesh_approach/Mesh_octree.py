@@ -1,8 +1,7 @@
 """
 TODO: find solution for lonely points which get their own voxel
-TODO: implement tree structure to print/save
-TODO: make general Analyzer class to inherit from (make full code packable)
-TODO: keep track of earliest voxel in Octree
+TODO: find ruleset for correct voxel structure
+TODO: check labels of green voxels in plot
 """
 
 import numpy as np
@@ -10,9 +9,9 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.cm as cm
 from itertools import combinations, product
-from anytree import RenderTree
+from Analyzer_template import LightningReconstructor, ListNode
 
-from Analyzer_template import LightningReconstructor, ListNode, LIST_OF_COLORS
+
 MAX_POINTS_PER_VOXEL = 10
 
 
@@ -92,7 +91,7 @@ class Voxel:
                 return self
 
         if self.parent.label == 2:
-            if self.label == 2:
+            if self.label == 2 and len(self.contents) < MAX_POINTS_PER_VOXEL:
                 self.active = False
 
         return None
@@ -166,13 +165,13 @@ class Octree:
     def set_voxel_contents(self, voxel: Voxel):
         if voxel.parent is not None:
             xmin = self.x[voxel.parent.contents] >= (voxel.center[0] - voxel.edge / 2)
-            xmax = self.x[voxel.parent.contents] < (voxel.center[0] + voxel.edge / 2)
+            xmax = self.x[voxel.parent.contents] <= (voxel.center[0] + voxel.edge / 2)
 
             ymin = self.y[voxel.parent.contents] >= (voxel.center[1] - voxel.edge / 2)
-            ymax = self.y[voxel.parent.contents] < (voxel.center[1] + voxel.edge / 2)
+            ymax = self.y[voxel.parent.contents] <= (voxel.center[1] + voxel.edge / 2)
 
             zmin = self.z[voxel.parent.contents] >= (voxel.center[2] - voxel.edge / 2)
-            zmax = self.z[voxel.parent.contents] < (voxel.center[2] + voxel.edge / 2)
+            zmax = self.z[voxel.parent.contents] <= (voxel.center[2] + voxel.edge / 2)
 
             voxel.set_contents(voxel.parent.contents[xmin * xmax * ymin * ymax * zmin * zmax])
 
@@ -313,9 +312,9 @@ class Octree:
             if leaf == self.earliest_voxel:
                 print(f"Earliest leaf has its center at {leaf.center} with edge length {leaf.edge}")
                 plot_cube(ax1, leaf.center, leaf.edge, color="r")
-            elif len(leaf.neighbours) == 1:
+            elif leaf.label == 1:
                 plot_cube(ax1, leaf.center, leaf.edge, color="r")
-            elif len(leaf.neighbours) == 3:
+            elif leaf.label == 3:
                 plot_cube(ax1, leaf.center, leaf.edge, color="g")
             else:
                 plot_cube(ax1, leaf.center, leaf.edge)
@@ -414,8 +413,8 @@ class Analyzer (LightningReconstructor):
     def label(self):
         self.octree.refine()
         start = self.find_earliest_voxel()
-        if start.label != 1:
-            raise Exception("Must start from an endpoint")
+        # if start.label != 1:
+        #    raise Exception("Must start from an endpoint")
 
         start.selected = True
         pool, BP = self.find_branch(start)
