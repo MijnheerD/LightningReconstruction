@@ -26,9 +26,9 @@ class Analyzer (LightningReconstructor):
         Class to analyze a lightning flash and divide the data into labelled branches. The result is stored inside a
         tree structure, in which every node contains the list of identifiers of the sources inside that branch. Note
         that the indices might not be sorted by time.
-        :param x: Array of the x-coordinates of the data to analyze.
-        :param y: Array of the y-coordinates of the data to analyze.
-        :param z: Array of the z-coordinates of the data to analyze.
+        :param x: Array of the x-coordinates of the data to analyze (easting).
+        :param y: Array of the y-coordinates of the data to analyze (northing).
+        :param z: Array of the z-coordinates of the data to analyze (height).
         :param t: Array of the t-coordinates of the data to analyze.
         :param direction: Direction of time in which to search (-1: backwards, 1: forwards).
         :param weights: Weights to be used in the search for the next point inside a branch.
