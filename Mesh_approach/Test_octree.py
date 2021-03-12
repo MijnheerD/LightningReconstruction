@@ -21,5 +21,8 @@ zcut = z[selection]
 tcut = t[selection]
 
 tree = Analyzer(tcut, xcut, ycut, zcut)
-tree.label()
-tree.plot_tree()
+tree.octree.refine()
+tree.octree.plot()
+
+# tree.label()
+# tree.plot_tree()
