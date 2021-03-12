@@ -20,6 +20,6 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-tree = Analyzer(tcut, xcut, ycut, zcut)
-tree.label()
-tree.plot_tree()
+tree = Octree(tcut, xcut, ycut, zcut)
+tree.refine()
+tree.plot()

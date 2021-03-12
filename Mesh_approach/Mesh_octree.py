@@ -277,10 +277,13 @@ class Octree:
         ax1.set_zlabel('Z')
         ax1.set_title('Voxels tracing the lightning signal')
         for leaf in leaves:
-            # print(f"Leaf has its center at {leaf.center} with edge length {leaf.edge}")
             if leaf == self.earliest_voxel:
                 print(f"Earliest leaf has its center at {leaf.center} with edge length {leaf.edge}")
                 plot_cube(ax1, leaf.center, leaf.edge, color="r")
+            elif len(leaf.neighbours) == 1:
+                plot_cube(ax1, leaf.center, leaf.edge, color="r")
+            elif len(leaf.neighbours) == 3:
+                plot_cube(ax1, leaf.center, leaf.edge, color="g")
             else:
                 plot_cube(ax1, leaf.center, leaf.edge)
 
@@ -378,7 +381,7 @@ class Analyzer (LightningReconstructor):
     def label(self):
         self.octree.refine()
         start = self.find_earliest_voxel()
-        if start.label is not 1:
+        if start.label != 1:
             raise Exception("Must start from an endpoint")
 
         start.selected = True
