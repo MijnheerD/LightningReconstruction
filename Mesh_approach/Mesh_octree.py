@@ -2,6 +2,7 @@
 TODO: find solution for lonely points which get their own voxel
 TODO: find ruleset for correct voxel structure
 TODO: check labels of green voxels in plot
+TODO: update master with changes
 """
 
 import numpy as np
