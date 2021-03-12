@@ -40,6 +40,13 @@ class LightningReconstructor:
         self.tree = ListNode('root')
         self.lonely = ListNode('lonely')
 
+    def label(self):
+        """
+        Method to label all the given data points with their branch. The result is a tree of ListNode's with every node
+        representing a branch and containing the indices of the data points which are part of that branch.
+        """
+        pass
+
     def _plot_tree(self, t_plot, x_plot, y_plot, z_plot):
         fig = plt.figure(1, figsize=(20, 10))
 
