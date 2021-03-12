@@ -31,7 +31,6 @@ analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, weights=(1, 0), d_cut=400)
 analyzer.load_tree_from_file("Data_subset_1.pickle")
 analyzer.line_plot()
 
-
 # analyzer.label()
 # analyzer.identify_data()
 
