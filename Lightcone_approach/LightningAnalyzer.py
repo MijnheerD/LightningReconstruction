@@ -1,24 +1,10 @@
+"""
+TODO: revise tree making process -> max 2 children per node!
+"""
+
 import numpy as np
-from anytree.search import findall_by_attr
-from Lightcone_approach.Lightcone_search_one_direction import Tracker
 from Analyzer_template import LightningReconstructor, ListNode
-
-
-class Source:
-    def __init__(self, x, y, z, t, ID):
-        """
-        Wrapper for a lightning VHF source.
-        :param x: x-coordinate of the source.
-        :param y: y-coordinate of the source.
-        :param z: z-coordinate of the source.
-        :param t: t-coordinate of the source.
-        :param ID: Unique identifier of the source, for bookkeeping purposes.
-        """
-        self.position = np.array([x, y, z])
-        self.t = t
-        self.ID = ID
-        self.selected = False
-        self.branch = None
+from Lightcone_approach.Lightcone_search_one_direction import Tracker, Source
 
 
 class Analyzer (LightningReconstructor):
@@ -78,12 +64,12 @@ class Analyzer (LightningReconstructor):
         super()._line_plot(t_plot)
 
     def give_branch(self, branch):
-        node = findall_by_attr(self.tree, 'n' + str(branch))
-        x = [self.tracker.x[ind] for ind in node[0]]
-        y = [self.tracker.y[ind] for ind in node[0]]
-        z = [self.tracker.z[ind] for ind in node[0]]
-        t = [self.tracker.t[ind] for ind in node[0]]
-        return (t, x, y, z)
+        node_indices = self.give_branch_ind(branch)
+        x = [self.tracker.x[ind] for ind in node_indices]
+        y = [self.tracker.y[ind] for ind in node_indices]
+        z = [self.tracker.z[ind] for ind in node_indices]
+        t = [self.tracker.t[ind] for ind in node_indices]
+        return t, x, y, z
 
     def first_branch(self):
         seed_source = self.sources[-1]

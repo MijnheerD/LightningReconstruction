@@ -1,9 +1,44 @@
-from Lightcone_approach.LinAlg import angle_between
-from collections import deque
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as col
 import matplotlib.cm as cm
+from collections import deque
+
+
+def unit_vector(vector):
+    """
+    Returns the unit vector of the vector.
+    """
+    return vector / np.linalg.norm(vector)
+
+
+def angle_between(v1, v2):
+    """
+    Calculate the angle between 2 n-dimensional vectors.
+    :param v1: First vector.
+    :param v2: Second vector, must have some dimension as the first one.
+    :return: The angle between the two in radians.
+    """
+    v1_u = unit_vector(v1)
+    v2_u = unit_vector(v2)
+    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+
+
+class Source:
+    def __init__(self, x, y, z, t, ID):
+        """
+        Wrapper for a lightning VHF source.
+        :param x: x-coordinate of the source.
+        :param y: y-coordinate of the source.
+        :param z: z-coordinate of the source.
+        :param t: t-coordinate of the source.
+        :param ID: Unique identifier of the source, for bookkeeping purposes.
+        """
+        self.position = np.array([x, y, z])
+        self.t = t
+        self.ID = ID
+        self.selected = False
+        self.branch = None
 
 
 class Tracker:
@@ -74,7 +109,7 @@ class Tracker:
         vel1 = [self.x[p2] - self.x[p1], self.y[p2] - self.y[p1], self.z[p2] - self.z[p1]]
         p1, p2 = v2
         vel2 = [self.x[p2] - self.x[p1], self.y[p2] - self.y[p1], self.z[p2] - self.z[p1]]
-        angle = angle_between(vel1, vel2)
+        angle = angle_between(np.array(vel1), np.array(vel2))
 
         return np.sin(angle / 2)
 

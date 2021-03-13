@@ -72,8 +72,8 @@ class LightningReconstructor:
         (left, right) = ax1.get_zlim3d()
         ax2.set_zlim3d(left, right)
 
-        counter = 0
         for _, _, node in RenderTree(self.tree.children[0]):
+            counter = int(node.name[1:])
             color = mcolors.hex2color(LIST_OF_COLORS[int(counter % len(LIST_OF_COLORS))])
             ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node], [z_plot[ind] for ind in node],
                         color=color, marker='o')
@@ -163,7 +163,7 @@ class LightningReconstructor:
 
             grid2 = np.array([t, x, y, z])
             fgrid2 = np.fft.fftn(grid2)
-            ft2 = fgrid2[0, :]
+            # ft2 = fgrid2[0, :]
             fx2 = fgrid2[1, :]
             fy2 = fgrid2[2, :]
             fz2 = fgrid2[3, :]
@@ -203,11 +203,17 @@ class LightningReconstructor:
                                 n - level) * min_displacement
                     x_append.append(x)
 
-                ax.plot([begin, end], [x, x])
+                counter = int(node.name[1:])
+                color = mcolors.hex2color(LIST_OF_COLORS[int(counter % len(LIST_OF_COLORS))])
+                ax.plot([begin, end], [x, x], color=color)
             x_positions[level] = x_append
 
         ax.tick_params(axis='y', which='both', right=False, left=False, labelleft=False)
         plt.show()
+
+    def give_branch_ind(self, branch):
+        node = findall_by_attr(self.tree, 'n' + str(branch))
+        return node[0]
 
     def render_tree(self):
         """

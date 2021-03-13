@@ -1,16 +1,10 @@
 """
 TODO: find solution for lonely points which get their own voxel
-TODO: find ruleset for correct voxel structure
-TODO: check labels of green voxels in plot
+TODO: fake neighbour tool does not work properly, more neighbours may be present
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-import matplotlib.cm as cm
 from itertools import combinations, product
-from Analyzer_template import LightningReconstructor, ListNode
-
 
 MAX_POINTS_PER_VOXEL = 10
 
@@ -54,9 +48,9 @@ class Voxel:
             2 = Branch
             3 = Branching point
         """
-        modifier = self.check_neighbours()
+        modifier = np.ceil(self.check_neighbours() / 2)
         if (len(self.neighbours) - modifier) < 4:
-            self.label = len(self.neighbours)
+            self.label = len(self.neighbours) - modifier
 
     def set_neighbours(self):
         self.neighbours.extend(self.parent.children)
@@ -73,11 +67,12 @@ class Voxel:
         fake = 0
         check_list = self.neighbours
         for neighbour in self.neighbours:
-            count = 0
+            count = False
             for nn in neighbour.neighbours:
-                if nn not in check_list:
-                    count += 1
-            if count == 0:
+                if nn in check_list:
+                    # If a neighbour shares at least 1 neighbour with self, there is an overlap of 2 voxels
+                    count = True
+            if count:
                 fake += 1
         return fake
 
@@ -225,14 +220,34 @@ class Octree:
             child.label = 1
 
         self.remove_empty_voxels()
-        self.endpoints = self.active_leaves
         for leaf in self.active_leaves:
             leaf.set_neighbours()
 
-    def refine(self):
+    def refine(self, min_side=100, max_side=10000):
         self.first_split()
 
-        while len(self.active_leaves) > 0:
+        # Enforce all voxels to be smaller than the max_side given, without caring about connections
+        while self.active_leaves[0].edge > max_side:
+            self.split_active()
+            self.set_contents()
+            self.remove_empty_voxels()
+
+            for leaf in self.active_leaves:
+                leaf.set_neighbours()
+                leaf.set_label()
+
+        # Look for endpoints and disconnected voxels in the active leaves, which are simply all non-empty voxels
+        lonely = []
+        for leaf in self.active_leaves:
+            if leaf.label == 1:
+                self.endpoints.append(leaf)
+            elif leaf.label == 0:
+                lonely.append(leaf)
+        for lonely_leaf in lonely:
+            self.active_leaves.remove(lonely_leaf)
+
+        # Once all voxels are of the required size, keep cutting carefully
+        while len(self.active_leaves) > 0 and self.active_leaves[0].edge > min_side:
             new_endpoints = []
             # Print the number of neighbours of current active leaves
             self.count_neighbours()
@@ -281,6 +296,8 @@ class Octree:
             # Update list of endpoints
             self.endpoints = new_endpoints
 
+        return lonely
+
     def find_leaves(self, voxel: Voxel):
         """
         Find all the leaves in the Octree starting at a given voxel as the root.
@@ -295,6 +312,10 @@ class Octree:
         return leaves
 
     def plot(self):
+        import matplotlib.pyplot as plt
+        import matplotlib.colors as mcolors
+        import matplotlib.cm as cm
+
         leaves = self.find_leaves(self.root)
 
         fig = plt.figure(1, figsize=(20, 10))
@@ -321,105 +342,3 @@ class Octree:
 
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
-
-
-class Analyzer (LightningReconstructor):
-    def __init__(self, t, x, y, z, max_branch=100):
-        super().__init__()
-
-        self.octree = Octree(t, x, y, z)
-        self.labelling = True
-        self.counter = 0
-        self.max_branch = max_branch
-
-    def plot_tree(self):
-        x_plot = self.octree.x
-        y_plot = self.octree.y
-        z_plot = self.octree.z
-        t_plot = self.octree.t
-
-        super()._plot_tree(t_plot, x_plot, y_plot, z_plot)
-
-    def plot_FT(self):
-        x_plot = self.octree.x
-        y_plot = self.octree.y
-        z_plot = self.octree.z
-        t_plot = self.octree.t
-
-        super()._plot_FT(t_plot, x_plot, y_plot, z_plot)
-
-    def identify_data(self, branch=0):
-        x_plot = self.octree.x
-        y_plot = self.octree.y
-        z_plot = self.octree.z
-        t_plot = self.octree.t
-
-        super()._identify_data(t_plot, x_plot, y_plot, z_plot, branch)
-
-    def line_plot(self):
-        t_plot = self.octree.t
-
-        super()._line_plot(t_plot)
-
-    def find_earliest_voxel(self):
-        leaves = self.octree.find_leaves(self.octree.root)
-        for leaf in leaves:
-            if 0 in leaf.contents:
-                return leaf
-
-    def find_next_voxel(self, voxel: Voxel):
-        start_time = voxel.contents[-1]
-
-        next_counter = 0
-        nextBP = voxel.neighbours[next_counter]
-        while nextBP.selected or (nextBP.contents[0] < start_time):
-            next_counter += 1
-            nextBP = voxel.neighbours[next_counter]
-            if next_counter == 2:
-                return None
-
-        return nextBP
-
-    def find_branch(self, start: Voxel):
-        pool = []
-        nextBP = start
-
-        while len(nextBP.neighbours) < 3:
-            pool.extend(nextBP.contents)
-            nextBP = self.find_next_voxel(nextBP)
-            nextBP.selected = True
-            if nextBP is None:
-                break
-
-        return pool, nextBP
-
-    def insert_branch(self, start: Voxel, branch: ListNode):
-        if self.counter >= self.max_branch:
-            return
-
-        pool1, nextBP1 = self.find_branch(start)
-        new_node1 = ListNode('n' + str(self.counter), pool1, parent=branch)
-        self.counter += 1
-
-        pool2, nextBP2 = self.find_branch(start)
-        new_node2 = ListNode('n' + str(self.counter), pool2, parent=branch)
-        self.counter += 1
-
-        if nextBP1 is not None:
-            self.insert_branch(nextBP1, new_node1)
-        if nextBP2 is not None:
-            self.insert_branch(nextBP2, new_node2)
-
-    def label(self):
-        self.octree.refine()
-        start = self.find_earliest_voxel()
-        # if start.label != 1:
-        #    raise Exception("Must start from an endpoint")
-
-        start.selected = True
-        pool, BP = self.find_branch(start)
-        new_node = ListNode('n' + str(self.counter), pool, parent=self.tree)
-        self.counter += 1
-
-        if BP is not None:
-            self.insert_branch(BP, new_node)
