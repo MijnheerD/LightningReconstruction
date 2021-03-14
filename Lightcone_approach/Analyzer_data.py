@@ -28,12 +28,13 @@ zcut = z[selection]
 tcut = t[selection]
 
 analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, weights=(1, 0), d_cut=400)
-analyzer.load_tree_from_file("Data_subset_1.pickle")
-analyzer.line_plot()
+# analyzer.load_tree_from_file("Data_subset_1.pickle")
 
-# analyzer.label()
+analyzer.label()
 # analyzer.identify_data()
 
 analyzer.render_tree()
 # analyzer.plot_tree()
-# analyzer.save_tree_to_file("Data_subset_1.pickle")
+analyzer.line_plot()
+
+# analyzer.save_tree_to_file("Data_subset_2.pickle")

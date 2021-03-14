@@ -117,10 +117,12 @@ class Tracker:
         indices = np.array(range(len(self.t)))
         values = {}
 
+        # Find all the points inside the light cone of currently selected point
         element = self.pool[index]
         select = self.in_lightcone(element)
         possible_points = indices[select]
 
+        # Check for closest points in Euclidean distance, considering also an alignment penalty
         for point in possible_points:
             if point not in self.pool:
                 d = self._distance_pair(element, point)
@@ -132,7 +134,7 @@ class Tracker:
     def find_next(self):
         """
         Finds next points at either begin and tail of the current researched branch.
-        :return:
+        :return: Index of last added point or None if nothing can be found
         """
         if self.direction == -1:
             index = 0

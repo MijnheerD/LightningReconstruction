@@ -12,7 +12,6 @@ class Analyzer(LightningReconstructor):
 
         self.octree = Octree(t, x, y, z)
         self.labelling = True
-        self.counter = 0
         self.min_voxel_size = min_voxel_size
         self.max_voxel_size = max_voxel_size
         self.max_branch = max_branch
@@ -45,6 +44,14 @@ class Analyzer(LightningReconstructor):
         t_plot = self.octree.t
 
         super()._line_plot(t_plot)
+
+    def give_branch(self, branch):
+        node_indices = self.give_branch_ind(branch)
+        x = [self.octree.x[ind] for ind in node_indices]
+        y = [self.octree.y[ind] for ind in node_indices]
+        z = [self.octree.z[ind] for ind in node_indices]
+        t = [self.octree.t[ind] for ind in node_indices]
+        return t, x, y, z
 
     def find_earliest_voxel(self):
         leaves = self.octree.find_leaves(self.octree.root)

@@ -1,5 +1,5 @@
 """
-TODO: revise tree making process -> max 2 children per node!
+
 """
 
 import numpy as np
@@ -31,7 +31,6 @@ class Analyzer (LightningReconstructor):
         self.sources = [Source(a, b, c, d, idx) for (d, a, b, c), idx in zip(txyz, range(len(txyz)))]
         self.direction = direction
         self.labelling = True
-        self.counter = 0
         self.max_branch = max_branch
 
     def plot_tree(self):
@@ -85,20 +84,35 @@ class Analyzer (LightningReconstructor):
             self.sources[idx].branch = new_node
 
     def insert_branch(self, branch: ListNode, insertion_id: int, leaf: list):
-        insertion_index = branch.index(insertion_id)
-        root = branch[:insertion_index + 1]
-        rest = branch[insertion_index + 1:]
+        root = [el for el in branch if el < insertion_id]
+        rest = [el for el in branch if el > insertion_id]
 
-        branch.update(root)
-        rest_node = ListNode('n' + str(self.counter), rest, parent=branch)
-        self.counter += 1
-        for idx in rest:
-            self.sources[idx].branch = rest_node
-        insert_node = ListNode('n' + str(self.counter), leaf, parent=branch)
-        self.counter += 1
-        for idx in leaf:
-            self.sources[idx].selected = True
-            self.sources[idx].branch = insert_node
+        if len(rest) < 10:
+            # If the insertion would result in a too small branch, do not split
+            branch.extend(leaf)
+            for idx in leaf:
+                self.sources[idx].selected = True
+                self.sources[idx].branch = branch
+        else:
+            # Create two new nodes and wire them to the parent branch
+            branch.update(root)
+            ex_children = branch.children
+
+            rest_node = ListNode('n' + str(self.counter), rest, parent=branch)
+            self.counter += 1
+            for idx in rest:
+                self.sources[idx].branch = rest_node
+
+            insert_node = ListNode('n' + str(self.counter), leaf, parent=branch)
+            self.counter += 1
+            for idx in leaf:
+                self.sources[idx].selected = True
+                self.sources[idx].branch = insert_node
+
+            # Rewire the parent-children relationship to reflect new situation
+            for child in ex_children:
+                child.parent = rest_node
+            branch.set_children([rest_node, insert_node])
 
     def merge_branch(self, branch: ListNode, new_part: list):
         branch.extend(new_part)

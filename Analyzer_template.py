@@ -24,21 +24,25 @@ class ListNode(list, NodeMixin):
         """
         if lst is None:
             lst = []
+        if children is None:
+            children = []
         super().__init__(lst)
         self.name = name
         self.parent = parent
-        if children:
-            self.children = children
+        self.children = children
 
     def update(self, contents: list):
         self.clear()
         self.extend(contents)
 
+    def set_children(self, children: list):
+        self.children = children
 
 class LightningReconstructor:
     def __init__(self):
         self.tree = ListNode('root')
         self.lonely = ListNode('lonely')
+        self.counter = 0
 
     def label(self):
         """
@@ -181,7 +185,7 @@ class LightningReconstructor:
         x_positions = [[0] * len(el) for el in nodes_per_level]
 
         n = len(nodes_per_level)
-        min_displacement = 10
+        min_displacement = 10 + self.counter * 10
 
         fig = plt.figure(3, figsize=(10, 5))
         ax = fig.add_subplot(111)
@@ -224,9 +228,9 @@ class LightningReconstructor:
             print(treestr.ljust(8), len(node))
 
     def save_tree_to_file(self, file):
-        f = open('/home/mitja/Documents/VUB/Masterthesis/LightningReconstruction/Pickle_saves/' + file, 'wb')
+        f = open('../Pickle_saves/' + file, 'wb')
         pickle.dump(self.tree, f)
 
     def load_tree_from_file(self, file):
-        f = open('/home/mitja/Documents/VUB/Masterthesis/LightningReconstruction/Pickle_saves/' + file, 'rb')
+        f = open('../Pickle_saves/' + file, 'rb')
         self.tree = pickle.load(f)
