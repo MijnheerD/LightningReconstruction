@@ -1,5 +1,5 @@
 """
-TODO: make branch reconstructor start at endpoint with earliest time
+
 """
 
 from Analyzer_template import LightningReconstructor, ListNode
@@ -53,11 +53,16 @@ class Analyzer(LightningReconstructor):
         t = [self.octree.t[ind] for ind in node_indices]
         return t, x, y, z
 
-    def find_earliest_voxel(self):
-        leaves = self.octree.find_leaves(self.octree.root)
-        for leaf in leaves:
-            if 0 in leaf.contents:
-                return leaf
+    def find_begin_voxel(self):
+        minimum = 1000
+        minimum_leaf = None
+        for leaf in self.octree.endpoints:
+            if min(leaf.contents) < minimum:
+                minimum = min(leaf.contents)
+                minimum_leaf = leaf
+                if minimum == 0:
+                    break
+        return minimum_leaf
 
     def find_next_voxel(self, voxel: Voxel):
         # start_time = voxel.contents[-1]
@@ -104,7 +109,7 @@ class Analyzer(LightningReconstructor):
 
     def label(self):
         self.lonely.extend(self.octree.refine(min_side=self.min_voxel_size, max_side=self.max_voxel_size))
-        start = self.octree.endpoints[0]
+        start = self.find_begin_voxel()
 
         start.selected = True
         pool, BP = self.find_branch(start)

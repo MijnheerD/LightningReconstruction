@@ -8,14 +8,14 @@ z = data[:, 3]
 t = data[:, 4]
 chi2 = data[:, 5]
 
-xmin = x > 60000
-xmax = x < 70000
-ymin = y > -50000
-ymax = y < -40000
-zmin = z > 2000
-zmax = z < 5500
-tmin = t > 1.14
-tmax = t < 1.18
+xmin = x > 42000
+xmax = x < 44000
+ymin = y > -17000
+ymax = y < -14000
+zmin = z > 6000
+zmax = z < 8000
+tmin = t > 0.95
+tmax = t < 1.2
 chi2max = chi2 < 16
 selection = chi2max * zmin * zmax * ymin * ymax * xmin * xmax
 

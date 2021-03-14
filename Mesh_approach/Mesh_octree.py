@@ -155,7 +155,6 @@ class Octree:
 
         self.active_leaves = []
         self.endpoints = []
-        self.earliest_voxel = self.root
 
     def set_voxel_contents(self, voxel: Voxel):
         if voxel.parent is not None:
@@ -170,10 +169,6 @@ class Octree:
 
             voxel.set_contents(voxel.parent.contents[xmin * xmax * ymin * ymax * zmin * zmax])
 
-            # Keep track of the voxel containing the earliest point in time
-            if voxel.parent == self.earliest_voxel:
-                if 0 in voxel.contents:
-                    self.earliest_voxel = voxel
         else:
             voxel.set_contents()
 
@@ -330,10 +325,7 @@ class Octree:
         ax1.set_zlabel('Z')
         ax1.set_title('Voxels tracing the lightning signal')
         for leaf in leaves:
-            if leaf == self.earliest_voxel:
-                print(f"Earliest leaf has its center at {leaf.center} with edge length {leaf.edge}")
-                plot_cube(ax1, leaf.center, leaf.edge, color="r")
-            elif leaf.label == 1:
+            if leaf.label == 1:
                 plot_cube(ax1, leaf.center, leaf.edge, color="r")
             elif leaf.label == 3:
                 plot_cube(ax1, leaf.center, leaf.edge, color="g")
