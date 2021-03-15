@@ -84,8 +84,9 @@ class Analyzer (LightningReconstructor):
             self.sources[idx].branch = new_node
 
     def insert_branch(self, branch: ListNode, insertion_id: int, leaf: list):
-        root = [el for el in branch if el < insertion_id]
-        rest = [el for el in branch if el > insertion_id]
+        insertion_index = branch.index(insertion_id)
+        root = branch[:insertion_index + 1]
+        rest = branch[insertion_index + 1:]
 
         if len(rest) < 10:
             # If the insertion would result in a too small branch, do not split
@@ -114,8 +115,10 @@ class Analyzer (LightningReconstructor):
                 child.parent = rest_node
             branch.set_children([rest_node, insert_node])
 
-    def merge_branch(self, branch: ListNode, new_part: list):
-        branch.extend(new_part)
+    def merge_branch(self, branch: ListNode, insertion_id: int, new_part: list):
+        insertion_index = branch.index(insertion_id)
+        for i in range(len(new_part)):
+            branch.insert(i + insertion_index, new_part[i])
         for idx in new_part:
             self.sources[idx].selected = True
             self.sources[idx].branch = branch
@@ -171,7 +174,7 @@ class Analyzer (LightningReconstructor):
             self.insert_branch(insertion_source.branch, seed_added, new_branch)
             self.labelling = True
         elif len(pool) > 0:
-            self.merge_branch(insertion_source.branch, new_branch)
+            self.merge_branch(insertion_source.branch, seed_added, new_branch)
             self.labelling = True
         else:
             self.labelling = False

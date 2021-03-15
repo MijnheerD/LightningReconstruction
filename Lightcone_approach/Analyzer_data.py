@@ -34,7 +34,7 @@ analyzer.label()
 # analyzer.identify_data()
 
 analyzer.render_tree()
-# analyzer.plot_tree()
+analyzer.plot_tree()
 analyzer.line_plot()
 
 # analyzer.save_tree_to_file("Data_subset_2.pickle")

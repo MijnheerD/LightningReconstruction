@@ -206,10 +206,12 @@ class LightningReconstructor:
                     x = x_parents[ind] + (-1) ** (node.parent.children.index(node)) * 2 ** (
                                 n - level) * min_displacement
                     x_append.append(x)
+                    ax.plot([begin, begin], [x_parents[ind], x], linestyle=':', color='black')
 
                 counter = int(node.name[1:])
                 color = mcolors.hex2color(LIST_OF_COLORS[int(counter % len(LIST_OF_COLORS))])
-                ax.plot([begin, end], [x, x], color=color)
+                ax.scatter(t_plot[node], [x]*len(node), color=color)
+                # ax.text(t_plot[node[0]]-0.001, x, f'{node.name}')
             x_positions[level] = x_append
 
         ax.tick_params(axis='y', which='both', right=False, left=False, labelleft=False)
