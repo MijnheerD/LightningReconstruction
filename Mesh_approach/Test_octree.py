@@ -1,5 +1,5 @@
 from numpy import genfromtxt
-from Mesh_approach.LightningAnalyzer import  Analyzer
+from Mesh_approach.LightningAnalyzer import Analyzer
 
 data = genfromtxt("../Data/data.txt", delimiter=",")
 x = data[:, 0]
@@ -20,7 +20,7 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-tree = Analyzer(tcut, xcut, ycut, zcut, min_voxel_size=0, max_voxel_size=200)
+tree = Analyzer(tcut, xcut, ycut, zcut, min_voxel_size=500, max_voxel_size=1000)
 tree.octree.refine(min_side=tree.min_voxel_size, max_side=tree.max_voxel_size)
 tree.octree.plot()
 

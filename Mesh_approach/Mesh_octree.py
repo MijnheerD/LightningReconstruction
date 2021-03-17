@@ -1,6 +1,9 @@
 """
 TODO: find solution for lonely points which get their own voxel
 TODO: fake neighbour tool does not work properly, more neighbours may be present
+TODO: endpoints are never initialized
+TODO: there are voxels with parent=None
+TODO: neighbouring information is not properly stored
 """
 
 import numpy as np
@@ -325,12 +328,14 @@ class Octree:
         ax1.set_zlabel('Z')
         ax1.set_title('Voxels tracing the lightning signal')
         for leaf in leaves:
-            if leaf.label == 1:
+            if leaf.label == 0:
+                plot_cube(ax1, leaf.center, leaf.edge, color="black")
+            elif leaf.label == 1:
                 plot_cube(ax1, leaf.center, leaf.edge, color="r")
             elif leaf.label == 3:
                 plot_cube(ax1, leaf.center, leaf.edge, color="g")
             else:
-                plot_cube(ax1, leaf.center, leaf.edge)
+                plot_cube(ax1, leaf.center, leaf.edge, color="b")
 
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
