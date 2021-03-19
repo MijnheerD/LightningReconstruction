@@ -1,9 +1,7 @@
 """
 TODO: find solution for lonely points which get their own voxel
 TODO: fake neighbour tool does not work properly, more neighbours may be present
-TODO: endpoints are never initialized
-TODO: there are voxels with parent=None
-TODO: neighbouring information is not properly stored
+TODO: endpoints are never initialized/not enforced in minimum voxel size
 """
 
 import numpy as np
@@ -53,13 +51,16 @@ class Voxel:
         """
         modifier = np.ceil(self.check_neighbours() / 2)
         if (len(self.neighbours) - modifier) < 4:
-            self.label = len(self.neighbours) - modifier
+            self.label = int(len(self.neighbours) - modifier)
 
-    def set_neighbours(self):
-        self.neighbours.extend(self.parent.children)
-        self.neighbours.remove(self)
+    def set_neighbours(self, revert=False):
+        if not revert:
+            self.neighbours.extend(self.parent.children)
+            self.neighbours.remove(self)
 
-        self._look_for_neighbours(self.parent.neighbours)
+            self._look_for_neighbours(self.parent.neighbours)
+        else:
+            self._look_for_neighbours(self.neighbours)
 
     def check_neighbours(self):
         """
@@ -196,11 +197,28 @@ class Octree:
         self.active_leaves = active_leaves
 
     def revert_split(self, parent: Voxel):
-        parent.active = False
+        parent.active = 2
+        # Every child's neighbours are also the parent's neighbour, but to avoid double counting use set()
+        new_parent_neighbours = set(parent.neighbours)
         for child in parent.children:
+            # Tell every neighbour that the child does not exist anymore : update neighbour information
+            for neighbour in child.neighbours:
+                if neighbour not in parent.children:
+                    # Other children of parent are also neighbours
+                    new_parent_neighbours.add(neighbour)
+                    try:
+                        child_ind = neighbour.neighbours.index(child)
+                        neighbour.neighbours[child_ind] = parent
+                    except ValueError:
+                        pass
+            # Disconnect the child from the tree completely
             child.parent = None
+            child.neighbours = []
+            child.active = 3
             self.active_leaves.remove(child)
+        # Adjust parent parameters to reflect new situation
         parent.children = []
+        parent.neighbours = list(new_parent_neighbours)
 
     def split_active(self):
         new_leaves = []
