@@ -53,14 +53,16 @@ class Voxel:
         if (len(self.neighbours) - modifier) < 4:
             self.label = int(len(self.neighbours) - modifier)
 
-    def set_neighbours(self, revert=False):
-        if not revert:
+    def set_neighbours(self, final=False):
+        if not final:
             self.neighbours.extend(self.parent.children)
             self.neighbours.remove(self)
 
             self._look_for_neighbours(self.parent.neighbours)
         else:
-            self._look_for_neighbours(self.neighbours)
+            final_neighbours = self.neighbours
+            self.neighbours = []
+            self._look_for_neighbours(final_neighbours)
 
     def check_neighbours(self):
         """
@@ -180,6 +182,17 @@ class Octree:
         for voxel in self.active_leaves:
             self.set_voxel_contents(voxel)
 
+    def set_final_neighbours(self):
+        final_voxels = self.find_leaves(self.root)
+        for leaf in final_voxels:
+            # Search through all the neighbours and find final_voxels which are neighbours
+            leaf.set_neighbours(final=True)
+        for leaf in final_voxels:
+            # Go through them again and check for potentially missed links, as set_neighbours() only looks down
+            for neighbour in leaf.neighbours:
+                if leaf not in neighbour.neighbours:
+                    neighbour.neighbours.append(leaf)
+
     def count_neighbours(self):
         count = []
         for voxel in self.active_leaves:
@@ -198,14 +211,10 @@ class Octree:
 
     def revert_split(self, parent: Voxel):
         parent.active = 2
-        # Every child's neighbours are also the parent's neighbour, but to avoid double counting use set()
-        new_parent_neighbours = set(parent.neighbours)
         for child in parent.children:
             # Tell every neighbour that the child does not exist anymore : update neighbour information
             for neighbour in child.neighbours:
                 if neighbour not in parent.children:
-                    # Other children of parent are also neighbours
-                    new_parent_neighbours.add(neighbour)
                     try:
                         child_ind = neighbour.neighbours.index(child)
                         neighbour.neighbours[child_ind] = parent
@@ -218,7 +227,8 @@ class Octree:
             self.active_leaves.remove(child)
         # Adjust parent parameters to reflect new situation
         parent.children = []
-        parent.neighbours = list(new_parent_neighbours)
+        # During the run, neighbours are only pointing to voxels of the same or bigger size,
+        # hence parent.neighbours is the same
 
     def split_active(self):
         new_leaves = []

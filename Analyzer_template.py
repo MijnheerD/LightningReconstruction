@@ -38,6 +38,7 @@ class ListNode(list, NodeMixin):
     def set_children(self, children: list):
         self.children = children
 
+
 class LightningReconstructor:
     def __init__(self):
         self.tree = ListNode('root')
