@@ -1,3 +1,7 @@
+"""
+TODO: write get_x, get_y, get_z functions to make coordinate extraction obvious
+"""
+
 import pickle
 import numpy as np  # Only necessary for FT
 import matplotlib.pyplot as plt
@@ -197,7 +201,7 @@ class LightningReconstructor:
             x_parents = x_positions[level - 1]
             for node in nodes_per_level[level]:
                 begin = t_plot[min(node)]
-                end = t_plot[max(node)]
+                # end = t_plot[max(node)]
 
                 if level == 0:
                     x = 0

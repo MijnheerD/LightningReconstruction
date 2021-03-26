@@ -49,7 +49,7 @@ class Voxel:
             2 = Branch
             3 = Branching point
         """
-        modifier = np.ceil(self.check_neighbours() / 2)
+        modifier = self.check_neighbours()
         if (len(self.neighbours) - modifier) < 4:
             self.label = int(len(self.neighbours) - modifier)
 
@@ -60,7 +60,7 @@ class Voxel:
 
             self._look_for_neighbours(self.parent.neighbours)
         else:
-            final_neighbours = self.neighbours
+            final_neighbours = set(self.neighbours)
             self.neighbours = []
             self._look_for_neighbours(final_neighbours)
 
@@ -71,15 +71,23 @@ class Voxel:
         :return: Number of neighbours which are not relevant for the counting.
         """
         fake = 0
-        check_list = self.neighbours
+        check_list = [self]
+        check_list.extend(self.neighbours)
+        n_neighbours = [[] for _ in check_list]
+        index = 0
         for neighbour in self.neighbours:
-            count = False
-            for nn in neighbour.neighbours:
-                if nn in check_list:
-                    # If a neighbour shares at least 1 neighbour with self, there is an overlap of 2 voxels
-                    count = True
-            if count:
+            nn = []
+            for el in neighbour.neighbours:
+                if el not in check_list:
+                    nn.append(el)
+            n_neighbours[index] = nn
+            if len(nn) == 0:
                 fake += 1
+            else:
+                for i in range(index):
+                    if set(nn) == set(n_neighbours[i]):
+                        fake += 1
+            index += 1
         return fake
 
     def check_parent_relation(self):
@@ -98,7 +106,9 @@ class Voxel:
         return None
 
     def _is_neighbour(self, other):
-        return (other.edge + self.edge) / np.sqrt(2) >= np.linalg.norm(other.center - self.center)
+        # np.linalg.norm rounds the result, so we need to allow for some numerical difference
+        # If corner neighbours allowed: (other.edge + self.edge) * np.sqrt(3) / 2
+        return (other.edge + self.edge) / np.sqrt(2) + 1e-5 >= np.linalg.norm(other.center - self.center)
 
     def _look_for_neighbours(self, possible_neighbours):
         for neighbour in possible_neighbours:
@@ -188,10 +198,15 @@ class Octree:
             # Search through all the neighbours and find final_voxels which are neighbours
             leaf.set_neighbours(final=True)
         for leaf in final_voxels:
-            # Go through them again and check for potentially missed links, as set_neighbours() only looks down
+            # Check for potentially missed links, as set_neighbours() only looks down
             for neighbour in leaf.neighbours:
                 if leaf not in neighbour.neighbours:
                     neighbour.neighbours.append(leaf)
+            # Set the label
+            leaf.set_label()
+            # leaf.label = len(leaf.neighbours)
+
+        return final_voxels
 
     def count_neighbours(self):
         count = []
@@ -270,6 +285,7 @@ class Octree:
             elif leaf.label == 0:
                 lonely.append(leaf)
         for lonely_leaf in lonely:
+            lonely_leaf.active = "lonely"
             self.active_leaves.remove(lonely_leaf)
 
         # Once all voxels are of the required size, keep cutting carefully
@@ -321,6 +337,12 @@ class Octree:
 
             # Update list of endpoints
             self.endpoints = new_endpoints
+
+        # After the loop, all leaves should be updated to have only leaf neighbours
+        final_voxels = self.set_final_neighbours()
+        for final_leaf in final_voxels:
+            if len(final_leaf.neighbours) == 0:
+                lonely.append(final_leaf)
 
         return lonely
 

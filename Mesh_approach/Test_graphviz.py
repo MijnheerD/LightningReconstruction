@@ -29,7 +29,7 @@ voxels = tree.octree.find_leaves(tree.octree.root)
 
 for counter in range(len(voxels)):
     if voxels[counter].label != 0:
-        graph.node('voxel'+str(counter), label=None, shape='circle')
+        graph.node('voxel'+str(counter), label=None, shape='point')
 for counter in range(len(voxels)):
     connection = False
     for neighbour in voxels[counter].neighbours:
