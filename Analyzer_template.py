@@ -1,7 +1,3 @@
-"""
-TODO: write get_x, get_y, get_z functions to make coordinate extraction obvious
-"""
-
 import pickle
 import numpy as np  # Only necessary for FT
 import matplotlib.pyplot as plt
@@ -44,10 +40,12 @@ class ListNode(list, NodeMixin):
 
 
 class LightningReconstructor:
-    def __init__(self):
+    def __init__(self, max_branch):
+        self.max_branch = max_branch
         self.tree = ListNode('root')
         self.lonely = ListNode('lonely')
         self.counter = 0
+        self.labelling = True
 
     def label(self):
         """
@@ -56,7 +54,24 @@ class LightningReconstructor:
         """
         pass
 
-    def _plot_tree(self, t_plot, x_plot, y_plot, z_plot):
+    def get_x(self):
+        return []
+
+    def get_y(self):
+        return []
+
+    def get_z(self):
+        return []
+
+    def get_t(self):
+        return []
+
+    def plot_tree(self):
+        t_plot = self.get_t()
+        x_plot = self.get_x()
+        y_plot = self.get_y()
+        z_plot = self.get_z()
+
         fig = plt.figure(1, figsize=(20, 10))
 
         cmap = cm.plasma
@@ -99,7 +114,12 @@ class LightningReconstructor:
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
 
-    def _identify_data(self, t_plot, x_plot, y_plot, z_plot, branch=0):
+    def identify_data(self, branch=0):
+        t_plot = self.get_t()
+        x_plot = self.get_x()
+        y_plot = self.get_y()
+        z_plot = self.get_z()
+
         if branch == 0:
             x = x_plot
             y = y_plot
@@ -136,7 +156,12 @@ class LightningReconstructor:
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax)
         plt.show()
 
-    def _plot_FT(self, t_plot, x_plot, y_plot, z_plot):
+    def plot_FT(self):
+        t_plot = self.get_t()
+        x_plot = self.get_x()
+        y_plot = self.get_y()
+        z_plot = self.get_z()
+
         fig = plt.figure(2, figsize=(20, 10))
 
         grid = np.array([t_plot, x_plot, y_plot, z_plot])
@@ -184,7 +209,9 @@ class LightningReconstructor:
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
 
-    def _line_plot(self, t_plot):
+    def line_plot(self):
+        t_plot = self.get_t()
+
         nodes_per_level = [tup for tup in LevelGroupOrderIter(self.tree)]
         nodes_per_level = nodes_per_level[1:]
         x_positions = [[0] * len(el) for el in nodes_per_level]
@@ -221,6 +248,20 @@ class LightningReconstructor:
 
         ax.tick_params(axis='y', which='both', right=False, left=False, labelleft=False)
         plt.show()
+
+    def give_branch(self, branch):
+        t_plot = self.get_t()
+        x_plot = self.get_x()
+        y_plot = self.get_y()
+        z_plot = self.get_z()
+
+        node_indices = self.give_branch_ind(branch)
+        x = [x_plot[ind] for ind in node_indices]
+        y = [y_plot[ind] for ind in node_indices]
+        z = [z_plot[ind] for ind in node_indices]
+        t = [t_plot[ind] for ind in node_indices]
+
+        return t, x, y, z
 
     def give_branch_ind(self, branch):
         node = findall_by_attr(self.tree, 'n' + str(branch))

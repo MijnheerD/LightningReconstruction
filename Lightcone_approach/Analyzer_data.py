@@ -3,6 +3,7 @@ The d_cut parameter is a fine-tuning parameter, that depends on the dataset cons
 #1 : d_cut=400
 #2 : d_cut=1000
 #3 : d_cut=600
+#4 : d_cut=1000
 """
 
 import numpy as np
@@ -14,6 +15,7 @@ y = data[:, 1]
 z = data[:, 2]
 t = data[:, 3]
 
+dataname = 'subset_1'
 xmin = x > 6000
 xmax = x < 9000
 ymin = y > -6000
@@ -27,14 +29,9 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, weights=(1, 0), d_cut=400)
-# analyzer.load_tree_from_file("Data_subset_1.pickle")
+analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, weights=(1, 0), d_cut=1000)
+analyzer.load_tree_from_file("Data_"+dataname+".pickle")
 
-analyzer.label()
-# analyzer.identify_data()
-
-# analyzer.render_tree()
-# analyzer.plot_tree()
+analyzer.render_tree()
+analyzer.plot_tree()
 analyzer.line_plot()
-
-# analyzer.save_tree_to_file("Data_subset_2.pickle")

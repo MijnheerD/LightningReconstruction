@@ -8,50 +8,23 @@ from Mesh_octree import Octree, Voxel
 
 class Analyzer(LightningReconstructor):
     def __init__(self, t, x, y, z, min_voxel_size=100, max_voxel_size=10000, max_branch=100):
-        super().__init__()
+        super().__init__(max_branch)
 
         self.octree = Octree(t, x, y, z)
-        self.labelling = True
         self.min_voxel_size = min_voxel_size
         self.max_voxel_size = max_voxel_size
-        self.max_branch = max_branch
 
-    def plot_tree(self):
-        x_plot = self.octree.x
-        y_plot = self.octree.y
-        z_plot = self.octree.z
-        t_plot = self.octree.t
+    def get_x(self):
+        return self.octree.x
 
-        super()._plot_tree(t_plot, x_plot, y_plot, z_plot)
+    def get_y(self):
+        return self.octree.y
 
-    def plot_FT(self):
-        x_plot = self.octree.x
-        y_plot = self.octree.y
-        z_plot = self.octree.z
-        t_plot = self.octree.t
+    def get_z(self):
+        return self.octree.z
 
-        super()._plot_FT(t_plot, x_plot, y_plot, z_plot)
-
-    def identify_data(self, branch=0):
-        x_plot = self.octree.x
-        y_plot = self.octree.y
-        z_plot = self.octree.z
-        t_plot = self.octree.t
-
-        super()._identify_data(t_plot, x_plot, y_plot, z_plot, branch)
-
-    def line_plot(self):
-        t_plot = self.octree.t
-
-        super()._line_plot(t_plot)
-
-    def give_branch(self, branch):
-        node_indices = self.give_branch_ind(branch)
-        x = [self.octree.x[ind] for ind in node_indices]
-        y = [self.octree.y[ind] for ind in node_indices]
-        z = [self.octree.z[ind] for ind in node_indices]
-        t = [self.octree.t[ind] for ind in node_indices]
-        return t, x, y, z
+    def get_t(self):
+        return self.octree.t
 
     def find_begin_voxel(self):
         minimum = 1000

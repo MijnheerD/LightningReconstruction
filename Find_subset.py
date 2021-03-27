@@ -4,19 +4,21 @@ import matplotlib.colors as col
 import matplotlib.cm as cm
 
 
-data = np.genfromtxt("../Data/data.txt", delimiter=",")
+data = np.genfromtxt("Data/data.txt", delimiter=",")
 x = data[:, 0]
 y = data[:, 1]
 z = data[:, 2]
 t = data[:, 3]
 
-xmin = x > 3000
-xmax = x < 7000
-ymin = y > -8000
-ymax = y < -6000
-zmin = z > 5000
-zmax = z < 10000
-selection = zmin * zmax * ymin * ymax * xmin * xmax
+xmin = x > 6000
+xmax = x < 10000
+ymin = y > -13000
+ymax = y < -10000
+zmin = z > 0
+zmax = z < 4000
+tmin = t > 1.15
+tmax = t < 1.17
+selection = zmin * zmax * ymin * ymax * xmin * xmax * tmin * tmax
 
 xcut = x[selection]
 ycut = y[selection]

@@ -23,52 +23,25 @@ class Analyzer (LightningReconstructor):
         :param max_points: Max number of points a branch can contain.
         :param max_branch: Max number of branches the analyzer may label.
         """
-        super().__init__()
+        super().__init__(max_branch)
 
         txyz = sorted(zip(t, x, y, z))
         t_sorted, x_sorted, y_sorted, z_sorted = map(np.array, zip(*list(txyz)))
         self.tracker = Tracker(x_sorted, y_sorted, z_sorted, t_sorted, -1, weights, d_cut, direction, max_points)
         self.sources = [Source(a, b, c, d, idx) for (d, a, b, c), idx in zip(txyz, range(len(txyz)))]
         self.direction = direction
-        self.labelling = True
-        self.max_branch = max_branch
 
-    def plot_tree(self):
-        x_plot = self.tracker.x
-        y_plot = self.tracker.y
-        z_plot = self.tracker.z
-        t_plot = self.tracker.t
+    def get_x(self):
+        return self.tracker.x
 
-        super()._plot_tree(t_plot, x_plot, y_plot, z_plot)
+    def get_y(self):
+        return self.tracker.y
 
-    def plot_FT(self):
-        x_plot = self.tracker.x
-        y_plot = self.tracker.y
-        z_plot = self.tracker.z
-        t_plot = self.tracker.t
+    def get_z(self):
+        return self.tracker.z
 
-        super()._plot_FT(t_plot, x_plot, y_plot, z_plot)
-
-    def identify_data(self, branch=0):
-        x_plot = self.tracker.x
-        y_plot = self.tracker.y
-        z_plot = self.tracker.z
-        t_plot = self.tracker.t
-
-        super()._identify_data(t_plot, x_plot, y_plot, z_plot, branch)
-
-    def line_plot(self):
-        t_plot = self.tracker.t
-
-        super()._line_plot(t_plot)
-
-    def give_branch(self, branch):
-        node_indices = self.give_branch_ind(branch)
-        x = [self.tracker.x[ind] for ind in node_indices]
-        y = [self.tracker.y[ind] for ind in node_indices]
-        z = [self.tracker.z[ind] for ind in node_indices]
-        t = [self.tracker.t[ind] for ind in node_indices]
-        return t, x, y, z
+    def get_t(self):
+        return self.tracker.t
 
     def first_branch(self):
         seed_source = self.sources[-1]
