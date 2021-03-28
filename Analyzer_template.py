@@ -55,15 +55,27 @@ class LightningReconstructor:
         pass
 
     def get_x(self):
+        """
+        :return: The list of x-coordinates of the stored source points.
+        """
         return []
 
     def get_y(self):
+        """
+        :return: The list of y-coordinates of the stored source points.
+        """
         return []
 
     def get_z(self):
+        """
+        :return: The list of z-coordinates of the stored source points.
+        """
         return []
 
     def get_t(self):
+        """
+        :return: The list of t-coordinates of the stored source points.
+        """
         return []
 
     def plot_tree(self):

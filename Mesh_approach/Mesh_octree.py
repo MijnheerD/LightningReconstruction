@@ -1,5 +1,4 @@
 """
-TODO: find solution for lonely points which get their own voxel
 TODO: fake neighbour tool does not work properly, more neighbours may be present
 TODO: endpoints are never initialized/not enforced in minimum voxel size
 """
@@ -8,6 +7,7 @@ import numpy as np
 from itertools import combinations, product
 
 MAX_POINTS_PER_VOXEL = 10
+MIN_DENSITY = 0.01  # Number of points per unit length of edge
 
 
 def plot_cube(ax, center, side_length, color="b"):
@@ -95,6 +95,9 @@ class Voxel:
         Check rule set for possible parent-child labels, to see if the split produced sensible results.
         :return: not None if the split should be reverted.
         """
+        if len(self.contents) / self.edge < MIN_DENSITY:
+            return None
+
         if self.label == 1:
             if self.parent.label != 1:
                 return self
