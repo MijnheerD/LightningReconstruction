@@ -28,6 +28,7 @@ class Voxel:
         self.edge = edge
         self.parent = parent
         self.neighbours = []
+        self.neighbours_scores = []
         self.children = []
         self.contents = np.array([])
         self.active = True
@@ -110,8 +111,36 @@ class Voxel:
 
     def _is_neighbour(self, other):
         # np.linalg.norm rounds the result, so we need to allow for some numerical difference
-        # If corner neighbours allowed: (other.edge + self.edge) * np.sqrt(3) / 2
+        # Only accounts for edge sharing and face sharing neighbours
         return (other.edge + self.edge) / np.sqrt(2) + 1e-5 >= np.linalg.norm(other.center - self.center)
+
+    def _is_corner_neighbour(self, other):
+        return (other.edge + self.edge) * np.sqrt(3) / 2 + 1e-5 >= np.linalg.norm(other.center - self.center)
+
+    def _is_what_neighbour(self, other):
+        if self._is_corner_neighbour(other):
+            lower_x_bound = other.center[0] >= self.center[0] - self.edge / 2 + 1e-5
+            lower_y_bound = other.center[1] >= self.center[1] - self.edge / 2 + 1e-5
+            lower_z_bound = other.center[2] >= self.center[2] - self.edge / 2 + 1e-5
+            higher_x_bound = other.center[0] <= self.center[0] + self.edge / 2 + 1e-5
+            higher_y_bound = other.center[1] <= self.center[1] + self.edge / 2 + 1e-5
+            higher_z_bound = other.center[2] <= self.center[2] + self.edge / 2 + 1e-5
+
+            x_bound = lower_x_bound * higher_x_bound
+            y_bound = lower_y_bound * higher_y_bound
+            z_bound = lower_z_bound * higher_z_bound
+
+            number = np.sum([x_bound, y_bound, z_bound])
+            if self._is_corner_neighbour(other):
+                if number == 2:
+                    return 'face'
+                elif number == 1:
+                    return 'edge'
+
+            if number == 0:
+                return 'corner'
+
+        return False
 
     def _look_for_neighbours(self, possible_neighbours):
         for neighbour in possible_neighbours:
@@ -216,6 +245,9 @@ class Octree:
         for voxel in self.active_leaves:
             count.append(len(voxel.neighbours))
         print(count)
+
+    def score_neighbours(self, voxel: Voxel):
+        pass
 
     def remove_empty_voxels(self):
         active_leaves = []
