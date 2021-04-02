@@ -21,7 +21,7 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-tree = Analyzer(tcut, xcut, ycut, zcut, min_voxel_size=20, max_voxel_size=200)
+tree = Analyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 tree.octree.refine(min_side=tree.min_voxel_size, max_side=tree.max_voxel_size)
 
 graph = Graph(comment='The voxel structure', filename='Graph_subset1', format='png')
@@ -32,7 +32,12 @@ for counter in range(len(voxels)):
         graph.node('voxel'+str(counter), label=None, shape='point')
 for counter in range(len(voxels)):
     connection = False
-    for neighbour in voxels[counter].neighbours:
+    nn = voxels[counter].neighbours
+    if len(nn) > 3:
+        top_nn = dict(sorted(nn.items(), key=lambda k: k[1][1])[:3])
+    else:
+        top_nn = nn
+    for neighbour in top_nn:
         try:
             pointer = voxels.index(neighbour)
             graph.edge('voxel' + str(counter), 'voxel' + str(pointer))

@@ -1,6 +1,7 @@
 """
 TODO: fake neighbour tool does not work properly, more neighbours may be present
 TODO: endpoints are never initialized/not enforced in minimum voxel size
+TODO: revisit check_parent_relation and labelling
 """
 
 import numpy as np
@@ -68,7 +69,7 @@ class Voxel:
                 if child is not self:
                     self.add_neighbour(child)
 
-            self._look_for_neighbours(self.parent.neighbours)
+            self._look_for_neighbours(self.parent.get_neighbours())
         else:
             final_neighbours = self.get_neighbours()  # Dictionary ensures unique neighbours only
             self.neighbours = {}
@@ -81,13 +82,6 @@ class Voxel:
             return True
         else:
             return False
-
-    def score_all_neighbours(self, x_data, y_data, z_data, neighbours=None):
-        if neighbours is None:
-            neighbours = self.neighbours
-        for neighbour in neighbours:
-            score = self._score_neighbour(neighbour, x_data, y_data, z_data)
-            self.neighbours[neighbour][1] = score
 
     def check_neighbours(self):
         """
@@ -115,20 +109,19 @@ class Voxel:
             index += 1
         return fake
 
-    def check_parent_relation(self):
-        """
-        Check rule set for possible parent-child labels, to see if the split produced sensible results.
-        :return: not None if the split should be reverted.
-        """
-        if self.label == 1:
-            if self.parent.label != 1:
-                return self
+    def score_all_neighbours(self, x_data, y_data, z_data, neighbours=None):
+        if neighbours is None:
+            neighbours = self.neighbours
+        for neighbour in neighbours:
+            score = self._score_neighbour(neighbour, x_data, y_data, z_data)
+            self.neighbours[neighbour][1] = score
 
-        if self.parent.label == 2:
-            if self.label == 2 and len(self.contents) < MAX_POINTS_PER_VOXEL:
-                self.active = False
-
-        return None
+    def _look_for_neighbours(self, possible_neighbours):
+        for neighbour in possible_neighbours:
+            if len(neighbour.children) == 0:
+                self.add_neighbour(neighbour)
+            else:
+                self._look_for_neighbours(neighbour.children)
 
     def _is_neighbour(self, other):
         # np.linalg.norm rounds the result, so we need to allow for some numerical difference
@@ -189,12 +182,20 @@ class Voxel:
 
         return score
 
-    def _look_for_neighbours(self, possible_neighbours):
-        for neighbour in possible_neighbours:
-            if len(neighbour.children) == 0:
-                self.add_neighbour(neighbour)
-            else:
-                self._look_for_neighbours(neighbour.children)
+    def check_parent_relation(self):
+        """
+        Check rule set for possible parent-child labels, to see if the split produced sensible results.
+        :return: not None if the split should be reverted.
+        """
+        if self.label == 1:
+            if self.parent.label != 1:
+                return self
+
+        if self.parent.label == 2:
+            if self.label == 2 and len(self.contents) < MAX_POINTS_PER_VOXEL:
+                self.active = False
+
+        return None
 
     def split(self):
         new_length = self.edge / 2
@@ -292,9 +293,6 @@ class Octree:
         for voxel in self.active_leaves:
             count.append(len(voxel.neighbours))
         print(count)
-
-    def score_neighbours(self, voxel: Voxel):
-        pass
 
     def remove_empty_voxels(self):
         active_leaves = []
