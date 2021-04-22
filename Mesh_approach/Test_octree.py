@@ -20,7 +20,7 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-tree = Analyzer(tcut, xcut, ycut, zcut, min_voxel_size=20, max_voxel_size=200)
+tree = Analyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 tree.octree.refine(min_side=tree.min_voxel_size, max_side=tree.max_voxel_size)
 tree.octree.plot()
 
