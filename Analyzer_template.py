@@ -279,6 +279,9 @@ class LightningReconstructor:
         node = findall_by_attr(self.tree, 'n' + str(branch))
         return node[0]
 
+    def nr_of_branches(self):
+        return len(self.tree.descendants)
+
     def render_tree(self):
         """
         Render the internal tree
