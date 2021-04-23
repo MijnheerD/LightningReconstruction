@@ -6,6 +6,8 @@
       <excludeFolder url="file://$MODULE_DIR$/Data" />
       <excludeFolder url="file://$MODULE_DIR$/Lightcone_approach/Two-direction search" />
       <excludeFolder url="file://$MODULE_DIR$/Mesh_approach/Figures" />
+      <excludeFolder url="file://$MODULE_DIR$/Analysis_tools/Figures" />
+      <excludeFolder url="file://$MODULE_DIR$/Mesh_approach/Graphs" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

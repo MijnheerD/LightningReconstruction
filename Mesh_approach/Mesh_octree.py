@@ -157,7 +157,7 @@ class Voxel:
         return False
 
     def _score_neighbour(self, other, x_data, y_data, z_data):
-        neighbour_type = self.neighbours[other][0]
+        # neighbour_type = self.neighbours[other][0]
         self_data = self.contents
         other_data = other.contents
 
@@ -168,8 +168,10 @@ class Voxel:
                 self_point = np.array([x_data[self_data[i]], y_data[self_data[i]], z_data[self_data[i]]])
                 other_point = np.array([x_data[other_data[j]], y_data[other_data[j]], z_data[other_data[j]]])
                 distances[i][j] = np.linalg.norm(self_point - other_point)
+        # noinspection PyArgumentList
         score = distances.min()
 
+        '''
         # Whether the voxels connect over a face, edge or corner also indicates the connection strength
         if neighbour_type == 'edge':
             score *= 3
@@ -179,6 +181,7 @@ class Voxel:
         # Connection to voxels with a too low density are disfavoured
         if len(other.contents) / other.edge < MIN_DENSITY:
             score *= 2
+        '''
 
         return score
 
@@ -298,6 +301,7 @@ class Octree:
         active_leaves = []
         for leaf in self.active_leaves:
             if len(leaf.contents) == 0:
+                # noinspection PyUnresolvedReferences
                 leaf.parent.remove_child(leaf)
                 # Disconnect the child from the tree completely
                 leaf.parent = None
@@ -476,3 +480,52 @@ class Octree:
 
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
+
+    def make_voxel_graph(self, filename: str, max_score=500, c_map="inferno"):
+        from graphviz import Graph
+        from matplotlib import cm
+        from matplotlib.colors import rgb_to_hsv
+
+        # Make the graph and the list of all leaf voxels
+        graph = Graph(comment='The voxel structure', filename='Graph_'+filename, format='png')
+        voxels = self.find_leaves(self.root)
+        colormap = cm.get_cmap(c_map)
+
+        for counter in range(len(voxels)):
+            # Make a node for every voxel, with the size depending on the number of data points inside it
+            size = len(voxels[counter].contents)
+            graph.node('voxel' + str(counter), label=None, shape='point', fixedsize='true', width=str(0.05 * size))
+
+        for counter in range(len(voxels)):
+            # Draw for every node the edges corresponding to the neighbours
+            nn = voxels[counter].neighbours
+
+            # Limit the number of drawn neighbours
+            if len(nn) > 3:
+                top_nn = dict(sorted(nn.items(), key=lambda k: k[1][1])[:3])
+            else:
+                top_nn = nn
+
+            # Change the drawing style and color depending on the type and score respectively
+            for neighbour in top_nn:
+                pointer = voxels.index(neighbour)
+                ninfo = top_nn[neighbour]
+                if ninfo[0] == 'face':
+                    linestyle = 'solid'
+                elif ninfo[0] == 'edge':
+                    linestyle = 'dashed'
+                else:
+                    linestyle = 'dotted'
+
+                if ninfo[1] > max_score:
+                    print(f"Max score has been exceeded with {ninfo[1]}")
+                    score = max_score
+                else:
+                    score = ninfo[1]
+                norm = score / max_score
+                color = rgb_to_hsv(colormap(norm)[0:3])
+                graph.edge('voxel' + str(counter), 'voxel' + str(pointer), style=linestyle,
+                           color=f"{color[0]:.3f} {color[1]:.3f} {color[2]:.3f}")
+
+        # Render the graph and save it
+        graph.render()
