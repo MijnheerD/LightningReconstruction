@@ -2,6 +2,7 @@
 TODO: fake neighbour tool does not work properly, more neighbours may be present
 TODO: endpoints are never initialized/not enforced in minimum voxel size
 TODO: revisit check_parent_relation and labelling
+TODO: scoring method is very slow for large voxels with lots of data points
 """
 
 import numpy as np
