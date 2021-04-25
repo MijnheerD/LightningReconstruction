@@ -10,14 +10,14 @@ y = data[:, 1]
 z = data[:, 2]
 t = data[:, 3]
 
-xmin = x > 6000
+xmin = x > 6605
 xmax = x < 10000
-ymin = y > -13000
-ymax = y < -10000
+ymin = y > -7000
+ymax = y < -6000
 zmin = z > 0
-zmax = z < 4000
-tmin = t > 1.15
-tmax = t < 1.17
+zmax = z < 3000
+tmin = t > 0.85
+tmax = t < 1
 selection = zmin * zmax * ymin * ymax * xmin * xmax * tmin * tmax
 
 xcut = x[selection]

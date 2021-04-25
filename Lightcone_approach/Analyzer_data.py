@@ -15,14 +15,16 @@ y = data[:, 1]
 z = data[:, 2]
 t = data[:, 3]
 
-dataname = 'subset_1'
+dataname = 'subset_4'
 xmin = x > 6000
-xmax = x < 9000
-ymin = y > -6000
-ymax = y < -3000
-zmin = z > 1500
-zmax = z < 5000
-selection = zmin * zmax * xmin * xmax * ymin * ymax
+xmax = x < 10000
+ymin = y > -13000
+ymax = y < -10000
+zmin = z > 0
+zmax = z < 4000
+tmin = t > 1.15
+tmax = t < 1.17
+selection = zmin * zmax * xmin * xmax * ymin * ymax * tmin * tmax
 
 xcut = x[selection]
 ycut = y[selection]
@@ -34,4 +36,4 @@ analyzer.load_tree_from_file("Data_"+dataname+".pickle")
 
 analyzer.render_tree()
 analyzer.plot_tree()
-analyzer.line_plot()
+# analyzer.line_plot()

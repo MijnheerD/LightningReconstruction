@@ -5,20 +5,22 @@ import matplotlib.cm as cm
 
 
 data = np.genfromtxt("Data/Srcs18-oddSE.csv", comments='!', delimiter=",")
-x = data[:, 1]
-y = data[:, 2]
+x = data[:, 2]
+y = data[:, 1]
 z = data[:, 3]
 t = data[:, 4]
+chi2 = data[:, 5]
 
-xmin = x > -100000
-xmax = x < -35000
-ymin = y > 10000
-ymax = y < 100000
-zmin = z > 0
-zmax = z < 10000
+xmin = x > 60000
+xmax = x < 70000
+ymin = y > -50000
+ymax = y < -40000
+zmin = z > 2000
+zmax = z < 5500
 tmin = t > 1.14
 tmax = t < 1.18
-selection = zmin * zmax * xmin * xmax * tmin * tmax
+chi2max = chi2 < 16
+selection = chi2max * zmin * zmax * xmin * xmax * tmin * tmax
 
 xcut = x[selection]
 ycut = y[selection]
@@ -30,7 +32,7 @@ ax = fig.add_subplot(121, projection='3d')
 ax2 = fig.add_subplot(122)
 
 cmap = cm.plasma
-norm = col.Normalize(vmin=min(t), vmax=max(t))
+norm = col.Normalize(vmin=min(tcut), vmax=max(tcut))
 
 ax.scatter(xcut, ycut, zcut, marker='o', c=tcut, cmap=cmap, norm=norm)
 ax.set_xlabel('X')

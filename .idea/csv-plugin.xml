@@ -10,6 +10,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\Find_subset_Srcs18.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\LatexTest.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\Lightcone_approach\Analyzer_data.py">
           <value>
             <Attribute>
@@ -25,6 +39,13 @@
           </value>
         </entry>
         <entry key="\Mesh_approach\Mesh_octree.py">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Mesh_approach\Test_graphviz.py">
           <value>
             <Attribute>
               <option name="separator" value="," />
