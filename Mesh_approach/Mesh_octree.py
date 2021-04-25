@@ -1,6 +1,8 @@
 """
 TODO: fake neighbour tool does not work properly, more neighbours may be present
 TODO: endpoints are never initialized/not enforced in minimum voxel size
+TODO: revisit check_parent_relation and labelling
+TODO: scoring method is very slow for large voxels with lots of data points
 """
 
 import numpy as np
@@ -27,13 +29,21 @@ class Voxel:
         self.center = center
         self.edge = edge
         self.parent = parent
-        self.neighbours = []
-        self.neighbours_scores = []
+        self.neighbours = {}
         self.children = []
         self.contents = np.array([])
         self.active = True
         self.label = None
         self.selected = False
+
+    def get_neighbours(self):
+        return list(self.neighbours.keys())
+
+    def get_neighbours_types(self):
+        return [val[0] for val in self.neighbours.values()]
+
+    def get_neighbours_scores(self):
+        return [val[1] for val in self.neighbours.values()]
 
     def set_contents(self, contents=None):
         if contents is not None:
@@ -56,14 +66,23 @@ class Voxel:
 
     def set_neighbours(self, final=False):
         if not final:
-            self.neighbours.extend(self.parent.children)
-            self.neighbours.remove(self)
+            for child in self.parent.children:
+                if child is not self:
+                    self.add_neighbour(child)
 
-            self._look_for_neighbours(self.parent.neighbours)
+            self._look_for_neighbours(self.parent.get_neighbours())
         else:
-            final_neighbours = set(self.neighbours)
-            self.neighbours = []
+            final_neighbours = self.get_neighbours()  # Dictionary ensures unique neighbours only
+            self.neighbours = {}
             self._look_for_neighbours(final_neighbours)
+
+    def add_neighbour(self, neighbour):
+        neighbour_type = self._is_what_neighbour(neighbour)
+        if neighbour_type:
+            self.neighbours[neighbour] = [neighbour_type, 0]
+            return True
+        else:
+            return False
 
     def check_neighbours(self):
         """
@@ -73,10 +92,10 @@ class Voxel:
         """
         fake = 0
         check_list = [self]
-        check_list.extend(self.neighbours)
+        check_list.extend(self.get_neighbours())
         n_neighbours = [[] for _ in check_list]
         index = 0
-        for neighbour in self.neighbours:
+        for neighbour in self.get_neighbours():
             nn = []
             for el in neighbour.neighbours:
                 if el not in check_list:
@@ -91,23 +110,19 @@ class Voxel:
             index += 1
         return fake
 
-    def check_parent_relation(self):
-        """
-        Check rule set for possible parent-child labels, to see if the split produced sensible results.
-        :return: not None if the split should be reverted.
-        """
-        if len(self.contents) / self.edge < MIN_DENSITY:
-            return None
+    def score_all_neighbours(self, x_data, y_data, z_data, neighbours=None):
+        if neighbours is None:
+            neighbours = self.neighbours
+        for neighbour in neighbours:
+            score = self._score_neighbour(neighbour, x_data, y_data, z_data)
+            self.neighbours[neighbour][1] = score
 
-        if self.label == 1:
-            if self.parent.label != 1:
-                return self
-
-        if self.parent.label == 2:
-            if self.label == 2 and len(self.contents) < MAX_POINTS_PER_VOXEL:
-                self.active = False
-
-        return None
+    def _look_for_neighbours(self, possible_neighbours):
+        for neighbour in possible_neighbours:
+            if len(neighbour.children) == 0:
+                self.add_neighbour(neighbour)
+            else:
+                self._look_for_neighbours(neighbour.children)
 
     def _is_neighbour(self, other):
         # np.linalg.norm rounds the result, so we need to allow for some numerical difference
@@ -142,13 +157,49 @@ class Voxel:
 
         return False
 
-    def _look_for_neighbours(self, possible_neighbours):
-        for neighbour in possible_neighbours:
-            if len(neighbour.children) == 0:
-                if self._is_neighbour(neighbour):
-                    self.neighbours.append(neighbour)
-            else:
-                self._look_for_neighbours(neighbour.children)
+    def _score_neighbour(self, other, x_data, y_data, z_data):
+        # neighbour_type = self.neighbours[other][0]
+        self_data = self.contents
+        other_data = other.contents
+
+        # Closest distance between two data points is the important factor in connection strength between 2 voxels
+        distances = np.zeros((len(self_data), len(other_data)))
+        for i in range(len(self_data)):
+            for j in range(len(other_data)):
+                self_point = np.array([x_data[self_data[i]], y_data[self_data[i]], z_data[self_data[i]]])
+                other_point = np.array([x_data[other_data[j]], y_data[other_data[j]], z_data[other_data[j]]])
+                distances[i][j] = np.linalg.norm(self_point - other_point)
+        # noinspection PyArgumentList
+        score = distances.min()
+
+        '''
+        # Whether the voxels connect over a face, edge or corner also indicates the connection strength
+        if neighbour_type == 'edge':
+            score *= 3
+        elif neighbour_type == 'corner':
+            score *= 5
+
+        # Connection to voxels with a too low density are disfavoured
+        if len(other.contents) / other.edge < MIN_DENSITY:
+            score *= 2
+        '''
+
+        return score
+
+    def check_parent_relation(self):
+        """
+        Check rule set for possible parent-child labels, to see if the split produced sensible results.
+        :return: not None if the split should be reverted.
+        """
+        if self.label == 1:
+            if self.parent.label != 1:
+                return self
+
+        if self.parent.label == 2:
+            if self.label == 2 and len(self.contents) < MAX_POINTS_PER_VOXEL:
+                self.active = False
+
+        return None
 
     def split(self):
         new_length = self.edge / 2
@@ -177,15 +228,12 @@ class Voxel:
         number = [len(child.neighbours) for child in self.children]
         ind = number.index(min(number))
 
-        # Find the closest neighbour to that child
-        distance_to_neigh = []
-        for neighbour in self.children[ind].neighbours:
-            distance_to_neigh.append(np.linalg.norm(neighbour.center - self.center))
-        n_ind = distance_to_neigh.index(min(distance_to_neigh))
+        # Find the neighbour of that child with the lowest score (= best connection)
+        best_neighbour = min(self.children[ind].neighbours, key=lambda k: self.children[ind].neighbours[k][1])
 
         # Make the selected child an endpoint with the closest neighbour as its only neighbour
         self.children[ind].label = 1
-        self.children[ind].neighbours = [self.children[ind].neighbours[n_ind]]
+        self.children[ind].neighbours = {best_neighbour: self.children[ind].neighbours[best_neighbour]}
 
         return self.children[ind]
 
@@ -229,14 +277,18 @@ class Octree:
         for leaf in final_voxels:
             # Search through all the neighbours and find final_voxels which are neighbours
             leaf.set_neighbours(final=True)
+
         for leaf in final_voxels:
             # Check for potentially missed links, as set_neighbours() only looks down
-            for neighbour in leaf.neighbours:
-                if leaf not in neighbour.neighbours:
-                    neighbour.neighbours.append(leaf)
+            for neighbour in leaf.get_neighbours():
+                if leaf not in neighbour.get_neighbours():
+                    neighbour.add_neighbour(leaf)
+
+            # Score all the neighbours
+            leaf.score_all_neighbours(self.x, self.y, self.z)
+
             # Set the label
             leaf.set_label()
-            # leaf.label = len(leaf.neighbours)
 
         return final_voxels
 
@@ -246,14 +298,15 @@ class Octree:
             count.append(len(voxel.neighbours))
         print(count)
 
-    def score_neighbours(self, voxel: Voxel):
-        pass
-
     def remove_empty_voxels(self):
         active_leaves = []
         for leaf in self.active_leaves:
             if len(leaf.contents) == 0:
+                # noinspection PyUnresolvedReferences
                 leaf.parent.remove_child(leaf)
+                # Disconnect the child from the tree completely
+                leaf.parent = None
+                leaf.neighbours = {}
                 leaf.active = False
             else:
                 active_leaves.append(leaf)
@@ -263,16 +316,17 @@ class Octree:
         parent.active = 2
         for child in parent.children:
             # Tell every neighbour that the child does not exist anymore : update neighbour information
-            for neighbour in child.neighbours:
+            for neighbour in child.get_neighbours():
                 if neighbour not in parent.children:
                     try:
-                        child_ind = neighbour.neighbours.index(child)
-                        neighbour.neighbours[child_ind] = parent
-                    except ValueError:
+                        del neighbour.neighbours[child]
+                    except KeyError:
                         pass
+                    if neighbour.add_neighbour(parent):
+                        neighbour.score_all_neighbours(self.x, self.y, self.z, neighbours=[parent])
             # Disconnect the child from the tree completely
             child.parent = None
-            child.neighbours = []
+            child.neighbours = {}
             child.active = 3
             self.active_leaves.remove(child)
         # Adjust parent parameters to reflect new situation
@@ -298,6 +352,7 @@ class Octree:
         self.remove_empty_voxels()
         for leaf in self.active_leaves:
             leaf.set_neighbours()
+            leaf.score_all_neighbours(self.x, self.y, self.z)
 
     def refine(self, min_side=100, max_side=10000):
         self.first_split()
@@ -310,6 +365,7 @@ class Octree:
 
             for leaf in self.active_leaves:
                 leaf.set_neighbours()
+                leaf.score_all_neighbours(self.x, self.y, self.z)
                 leaf.set_label()
 
         # Look for endpoints and disconnected voxels in the active leaves, which are simply all non-empty voxels
@@ -342,6 +398,7 @@ class Octree:
             revert_parents = set()
             for leaf in self.active_leaves:
                 leaf.set_neighbours()
+                leaf.score_all_neighbours(self.x, self.y, self.z)
                 leaf.set_label()
                 if leaf.label == 0:
                     revert_parents.add(leaf.parent)
@@ -424,3 +481,52 @@ class Octree:
 
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
+
+    def make_voxel_graph(self, filename: str, max_score=500, c_map="inferno"):
+        from graphviz import Graph
+        from matplotlib import cm
+        from matplotlib.colors import rgb_to_hsv
+
+        # Make the graph and the list of all leaf voxels
+        graph = Graph(comment='The voxel structure', filename='Graph_'+filename, format='png')
+        voxels = self.find_leaves(self.root)
+        colormap = cm.get_cmap(c_map)
+
+        for counter in range(len(voxels)):
+            # Make a node for every voxel, with the size depending on the number of data points inside it
+            size = len(voxels[counter].contents)
+            graph.node('voxel' + str(counter), label=None, shape='point', fixedsize='true', width=str(0.05 * size))
+
+        for counter in range(len(voxels)):
+            # Draw for every node the edges corresponding to the neighbours
+            nn = voxels[counter].neighbours
+
+            # Limit the number of drawn neighbours
+            if len(nn) > 3:
+                top_nn = dict(sorted(nn.items(), key=lambda k: k[1][1])[:3])
+            else:
+                top_nn = nn
+
+            # Change the drawing style and color depending on the type and score respectively
+            for neighbour in top_nn:
+                pointer = voxels.index(neighbour)
+                ninfo = top_nn[neighbour]
+                if ninfo[0] == 'face':
+                    linestyle = 'solid'
+                elif ninfo[0] == 'edge':
+                    linestyle = 'dashed'
+                else:
+                    linestyle = 'dotted'
+
+                if ninfo[1] > max_score:
+                    print(f"Max score has been exceeded with {ninfo[1]}")
+                    score = max_score
+                else:
+                    score = ninfo[1]
+                norm = score / max_score
+                color = rgb_to_hsv(colormap(norm)[0:3])
+                graph.edge('voxel' + str(counter), 'voxel' + str(pointer), style=linestyle,
+                           color=f"{color[0]:.3f} {color[1]:.3f} {color[2]:.3f}")
+
+        # Render the graph and save it
+        graph.render()
