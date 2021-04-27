@@ -45,6 +45,10 @@ class Voxel:
     def get_neighbours_scores(self):
         return [val[1] for val in self.neighbours.values()]
 
+    def set_score(self, neighbour, score):
+        tup = self.neighbours[neighbour]
+        self.neighbours[neighbour] = [tup[0], score]
+
     def set_contents(self, contents=None):
         if contents is not None:
             self.contents = contents
@@ -134,9 +138,9 @@ class Voxel:
 
     def _is_what_neighbour(self, other):
         if self._is_corner_neighbour(other):
-            lower_x_bound = other.center[0] >= self.center[0] - self.edge / 2 + 1e-5
-            lower_y_bound = other.center[1] >= self.center[1] - self.edge / 2 + 1e-5
-            lower_z_bound = other.center[2] >= self.center[2] - self.edge / 2 + 1e-5
+            lower_x_bound = other.center[0] >= self.center[0] - self.edge / 2 - 1e-5
+            lower_y_bound = other.center[1] >= self.center[1] - self.edge / 2 - 1e-5
+            lower_z_bound = other.center[2] >= self.center[2] - self.edge / 2 - 1e-5
             higher_x_bound = other.center[0] <= self.center[0] + self.edge / 2 + 1e-5
             higher_y_bound = other.center[1] <= self.center[1] + self.edge / 2 + 1e-5
             higher_z_bound = other.center[2] <= self.center[2] + self.edge / 2 + 1e-5
@@ -283,6 +287,8 @@ class Octree:
             for neighbour in leaf.get_neighbours():
                 if leaf not in neighbour.get_neighbours():
                     neighbour.add_neighbour(leaf)
+                    # If neighbour has a lower index in final_voxels, it will not score leaf
+                    neighbour.score_all_neighbours(self.x, self.y, self.z, neighbours=[leaf])
 
             # Score all the neighbours
             leaf.score_all_neighbours(self.x, self.y, self.z)

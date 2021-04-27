@@ -9,7 +9,7 @@
       <excludeFolder url="file://$MODULE_DIR$/Analysis_tools/Figures" />
       <excludeFolder url="file://$MODULE_DIR$/Mesh_approach/Graphs" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 3.8 (LightningReconstruction)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
