@@ -444,10 +444,12 @@ class Octree:
 
         return lonely
 
-    def find_leaves(self, voxel: Voxel):
+    def find_leaves(self, voxel: Voxel = None):
         """
         Find all the leaves in the Octree starting at a given voxel as the root.
         """
+        if voxel is None:
+            voxel = self.root
         leaves = []
         for child in voxel.children:
             if len(child.children) == 0:
