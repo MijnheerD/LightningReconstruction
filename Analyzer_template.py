@@ -123,7 +123,7 @@ class LightningReconstructor:
                 continue
             ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
 
-        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
+        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=[ax1, ax2], location='bottom', shrink=0.6)
         plt.show()
 
     def identify_data(self, branch=0):

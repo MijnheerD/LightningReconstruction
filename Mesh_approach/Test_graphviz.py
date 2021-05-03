@@ -27,8 +27,9 @@ tcut = t[selection]
 
 tree = Analyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 tree.octree.refine(min_side=tree.min_voxel_size, max_side=tree.max_voxel_size)
-# tree.octree.make_voxel_graph(dataname)
+tree.octree.make_voxel_graph(dataname+'_unflatten')
 
+'''
 voxels = tree.octree.find_leaves(tree.octree.root)
 connections = lil_matrix((len(voxels), len(voxels)), dtype='f')  # use float32 to use less memory
 for counter in range(len(voxels)):
@@ -50,4 +51,6 @@ for counter in range(len(voxels)):
         if mst[counter, pointer]:
             graph.edge('voxel' + str(counter), 'voxel' + str(pointer))
 
-graph.render()
+u = graph.unflatten(stagger=3)
+u.render()
+'''

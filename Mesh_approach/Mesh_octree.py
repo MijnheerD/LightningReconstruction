@@ -537,4 +537,5 @@ class Octree:
                            color=f"{color[0]:.3f} {color[1]:.3f} {color[2]:.3f}")
 
         # Render the graph and save it
-        graph.render()
+        u = graph.unflatten(stagger=5)
+        u.render()

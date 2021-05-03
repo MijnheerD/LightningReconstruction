@@ -146,7 +146,7 @@ class Analyzer(LightningReconstructor):
 
     def count_connections(self, sym):
         connections = zeros((len(self.voxels), 3))
-        BP = []
+        bp = []
         removed = []
         normal_to_absorb = []
         for counter in range(len(self.voxels)):
@@ -171,7 +171,7 @@ class Analyzer(LightningReconstructor):
                     connections[counter][2] += 1
 
             if connections[counter][2] >= 3:
-                BP.append(counter)
+                bp.append(counter)
 
             if connections[counter][2] >= 2:
                 if connections[counter][1] > 0:
@@ -185,7 +185,7 @@ class Analyzer(LightningReconstructor):
             normal_to_absorb = []
 
         self.connections = connections
-        self.branching_points = BP
+        self.branching_points = bp
 
         return removed
 
