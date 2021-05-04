@@ -40,12 +40,13 @@ class ListNode(list, NodeMixin):
 
 
 class LightningReconstructor:
-    def __init__(self, max_branch):
+    def __init__(self, max_branch, type='Reconstructor'):
         self.max_branch = max_branch
         self.tree = ListNode('root')
         self.lonely = ListNode('lonely')
         self.counter = 0
         self.labelling = True
+        self.type = type
 
     def label(self):
         """
@@ -221,7 +222,7 @@ class LightningReconstructor:
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap))
         plt.show()
 
-    def line_plot(self):
+    def line_plot(self, filename=None):
         t_plot = self.get_t()
 
         nodes_per_level = [tup for tup in LevelGroupOrderIter(self.tree)]
@@ -260,6 +261,8 @@ class LightningReconstructor:
 
         ax.tick_params(axis='y', which='both', right=False, left=False, labelleft=False)
         plt.show()
+        if filename is not None:
+            fig.savefig('Lineplots/' + self.type + '/' + filename + '.png', bbox_inches='tight')
 
     def give_branch(self, branch):
         t_plot = self.get_t()
@@ -291,9 +294,9 @@ class LightningReconstructor:
             print(treestr.ljust(8), len(node))
 
     def save_tree_to_file(self, file):
-        f = open('../Pickle_saves/' + file, 'wb')
+        f = open('./Pickle_saves/' + self.type + '/' + file, 'wb')
         pickle.dump(self.tree, f)
 
     def load_tree_from_file(self, file):
-        f = open('../Pickle_saves/' + file, 'rb')
+        f = open('../Pickle_saves/' + self.type + '/' + file, 'rb')
         self.tree = pickle.load(f)

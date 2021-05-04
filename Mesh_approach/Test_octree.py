@@ -14,12 +14,12 @@ y = data[:, 1]
 z = data[:, 2]
 t = data[:, 3]
 
-xmin = x > 6000
-xmax = x < 9000
-ymin = y > -6000
-ymax = y < -3000
-zmin = z > 1500
-zmax = z < 5000
+xmin = x > 3000
+xmax = x < 7000
+ymin = y > -8000
+ymax = y < -6000
+zmin = z > 5000
+zmax = z < 10000
 selection = zmin * zmax * ymin * ymax * xmin * xmax
 
 xcut = x[selection]
@@ -27,6 +27,6 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-tree = Analyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
-tree.label()
-tree.plot_tree()
+tree = Analyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
+tree.octree.refine(min_side=50, max_side=300)
+tree.octree.voxel_plot()

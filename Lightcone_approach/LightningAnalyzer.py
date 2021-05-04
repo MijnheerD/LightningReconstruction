@@ -8,7 +8,7 @@ from Lightcone_approach.Lightcone_search_one_direction import Tracker, Source
 
 
 class Analyzer (LightningReconstructor):
-    def __init__(self, x, y, z, t, direction, weights=(1, 0), d_cut=700, max_points=1000, max_branch=100):
+    def __init__(self, t, x, y, z, direction, weights=(1, 0), d_cut=700, max_points=1000, max_branch=100):
         """
         Class to analyze a lightning flash and divide the data into labelled branches. The result is stored inside a
         tree structure, in which every node contains the list of identifiers of the sources inside that branch. Note
@@ -23,7 +23,7 @@ class Analyzer (LightningReconstructor):
         :param max_points: Max number of points a branch can contain.
         :param max_branch: Max number of branches the analyzer may label.
         """
-        super().__init__(max_branch)
+        super().__init__(max_branch, 'Lightcone')
 
         txyz = sorted(zip(t, x, y, z))
         t_sorted, x_sorted, y_sorted, z_sorted = map(np.array, zip(*list(txyz)))

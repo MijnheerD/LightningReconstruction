@@ -32,12 +32,12 @@ y = data[:, 1]
 z = data[:, 2]
 t = data[:, 3]
 
-dataname = 'subset_1'
-xmin = x > 6000
-xmax = x < 9000
-ymin = y > -6000
-ymax = y < -3000
-zmin = z > 1500
+dataname = 'subset_3'
+xmin = x > -4500
+xmax = x < -3000
+ymin = y > -8500
+ymax = y < -5000
+zmin = z > 3000
 zmax = z < 5000
 selection = zmin * zmax * ymin * ymax * xmin * xmax
 
@@ -98,7 +98,7 @@ for counter in range(len(voxels)):
 
     normal_to_absorb = []
 
-graph = Graph(comment='Minimum spanning tree', filename='MST_'+dataname, format='png')
+graph = Graph(comment='Minimum spanning tree', filename='Graphs/MST_'+dataname, format='png')
 for counter in range(len(voxels)):
     if counter not in removed:
         # Make a node for every voxel, with the size depending on the number of data points inside it

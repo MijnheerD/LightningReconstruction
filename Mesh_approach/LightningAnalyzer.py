@@ -32,7 +32,7 @@ def dfc(sym_graph, current_vertex, visited=None):
 
 class Analyzer(LightningReconstructor):
     def __init__(self, t, x, y, z, min_voxel_size=100, max_voxel_size=10000, max_branch=100):
-        super().__init__(max_branch)
+        super().__init__(max_branch, 'Mesh')
 
         self.octree = Octree(t, x, y, z)
         self.min_voxel_size = min_voxel_size
@@ -90,6 +90,9 @@ class Analyzer(LightningReconstructor):
                         neighbours = neighbours[neighbours != nn]
                 if len(neighbours) > 2:
                     raise Exception("Cannot handle this situation: too many neighbours")
+                elif len(neighbours) == 1:
+                    # We have removed all neighbours except 1, which should be previous
+                    break
             elif sum(self.connections[next_voxel]) == 1:
                 if previous != next_voxel:
                     break
@@ -134,9 +137,13 @@ class Analyzer(LightningReconstructor):
         for counter in range(len(self.voxels)):
             nn = self.voxels[counter].neighbours
             for neighbour in nn:
-                pointer = self.voxels.index(neighbour)
-                ninfo = nn[neighbour]
-                connections[counter, pointer] = ninfo[1].astype('f')
+                # Some reverted voxels are not properly removed from neighbour lists and these can lead to ValueErrors
+                try:
+                    pointer = self.voxels.index(neighbour)
+                    ninfo = nn[neighbour]
+                    connections[counter, pointer] = ninfo[1].astype('f')
+                except ValueError:
+                    pass
 
         # Construct the minimum spanning tree and make it diagonal
         mst = minimum_spanning_tree(connections)

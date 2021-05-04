@@ -459,7 +459,7 @@ class Octree:
 
         return leaves
 
-    def plot(self):
+    def voxel_plot(self):
         import matplotlib.pyplot as plt
         import matplotlib.colors as mcolors
         import matplotlib.cm as cm
@@ -496,7 +496,7 @@ class Octree:
         from matplotlib.colors import rgb_to_hsv
 
         # Make the graph and the list of all leaf voxels
-        graph = Graph(comment='The voxel structure', filename='Graph_'+filename, format='png')
+        graph = Graph(comment='The voxel structure', filename='Graphs/Graph_'+filename, format='png')
         voxels = self.find_leaves(self.root)
         colormap = cm.get_cmap(c_map)
 
