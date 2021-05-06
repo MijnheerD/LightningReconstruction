@@ -26,9 +26,8 @@ ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
-analyzer = Analyzer(xcut, ycut, zcut, tcut, -1, weights=(1, 0), d_cut=400)
+analyzer = Analyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=400)
 analyzer.load_tree_from_file("Data_"+dataname+".pickle")
-
 
 nr_of_bins = 50
 bin_size = (max(zcut) - min(zcut))/nr_of_bins  # m

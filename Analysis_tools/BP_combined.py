@@ -12,8 +12,8 @@ t = data[:, 3]
 
 dataname = 'combined'
 
-lengths_lightcone = []
-lengths_mesh = []
+bp_altitudes_lightcone = []
+bp_altitudes_mesh = []
 
 dataset = 'subset_1'
 xmin = x > 6000
@@ -35,12 +35,16 @@ analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxe
 analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
-    branch_t, _, _, _, _ = analyzer_lightcone.give_branch(i)
-    lengths_lightcone.append(max(branch_t) - min(branch_t))
+    t_branch, _, _, branch_z, leaf = analyzer_lightcone.give_branch(i)
+    if not leaf:
+        ind = np.argmax(t_branch)
+        bp_altitudes_lightcone.append(branch_z[ind])
 
 for i in range(analyzer_mesh.nr_of_branches()):
-    branch_t, _, _, _, _ = analyzer_mesh.give_branch(i)
-    lengths_mesh.append(max(branch_t) - min(branch_t))
+    t_branch, _, _, branch_z, leaf = analyzer_mesh.give_branch(i)
+    if not leaf:
+        ind = np.argmax(t_branch)
+        bp_altitudes_mesh.append(branch_z[ind])
 
 dataset = 'subset_2'
 xmin = x > 3000
@@ -62,12 +66,16 @@ analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxe
 analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
-    branch_t, _, _, _, _ = analyzer_lightcone.give_branch(i)
-    lengths_lightcone.append(max(branch_t) - min(branch_t))
+    t_branch, _, _, branch_z, leaf = analyzer_lightcone.give_branch(i)
+    if not leaf:
+        ind = np.argmax(t_branch)
+        bp_altitudes_lightcone.append(branch_z[ind])
 
 for i in range(analyzer_mesh.nr_of_branches()):
-    branch_t, _, _, _, _ = analyzer_mesh.give_branch(i)
-    lengths_mesh.append(max(branch_t) - min(branch_t))
+    t_branch, _, _, branch_z, leaf = analyzer_mesh.give_branch(i)
+    if not leaf:
+        ind = np.argmax(t_branch)
+        bp_altitudes_mesh.append(branch_z[ind])
 
 dataset = 'subset_3'
 xmin = x > -4500
@@ -89,12 +97,16 @@ analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxe
 analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
-    branch_t, _, _, _, _ = analyzer_lightcone.give_branch(i)
-    lengths_lightcone.append(max(branch_t) - min(branch_t))
+    t_branch, _, _, branch_z, leaf = analyzer_lightcone.give_branch(i)
+    if not leaf:
+        ind = np.argmax(t_branch)
+        bp_altitudes_lightcone.append(branch_z[ind])
 
 for i in range(analyzer_mesh.nr_of_branches()):
-    branch_t, _, _, _, _ = analyzer_mesh.give_branch(i)
-    lengths_mesh.append(max(branch_t) - min(branch_t))
+    t_branch, _, _, branch_z, leaf = analyzer_mesh.give_branch(i)
+    if not leaf:
+        ind = np.argmax(t_branch)
+        bp_altitudes_mesh.append(branch_z[ind])
 
 dataset = 'subset_4'
 xmin = x > 6000
@@ -118,25 +130,29 @@ analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxe
 analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
-    branch_t, _, _, _, _ = analyzer_lightcone.give_branch(i)
-    lengths_lightcone.append(max(branch_t) - min(branch_t))
+    t_branch, _, _, branch_z, leaf = analyzer_lightcone.give_branch(i)
+    if not leaf:
+        ind = np.argmax(t_branch)
+        bp_altitudes_lightcone.append(branch_z[ind])
 
 for i in range(analyzer_mesh.nr_of_branches()):
-    branch_t, _, _, _, _ = analyzer_mesh.give_branch(i)
-    lengths_mesh.append(max(branch_t) - min(branch_t))
+    t_branch, _, _, branch_z, leaf = analyzer_mesh.give_branch(i)
+    if not leaf:
+        ind = np.argmax(t_branch)
+        bp_altitudes_mesh.append(branch_z[ind])
 
 
 fig = plt.figure(figsize=(16, 8))
 ax1 = fig.add_subplot(121)
-ax1.hist(lengths_lightcone, bins=25)
-ax1.set_xlabel(r'Time length of the branch $(s)$')
-ax1.set_ylabel(r'Number of branches')
+ax1.hist(bp_altitudes_lightcone, orientation='horizontal', range=(1750, 6250), bins=20)
+ax1.set_xlabel(r'Number of branching points')
+ax1.set_ylabel(r'Altitude $(m)$')
 ax1.set_title(r'Light cone algorithm')
 
 ax2 = fig.add_subplot(122)
-ax2.hist(lengths_mesh, bins=25)
-ax2.set_xlabel(r'Time length of the branch $(s)$')
-ax2.set_ylabel(r'Number of branches')
+ax2.hist(bp_altitudes_mesh, orientation='horizontal', range=(1750, 6250), bins=20)
+ax2.set_xlabel(r'Number of branching points')
+ax2.set_ylabel(r'Altitude $(m)$')
 ax2.set_title(r'Voxel algorithm')
 
-fig.savefig('Figures/timelength_data_' + dataname + '.png')
+fig.savefig('Figures/bp_data_' + dataname + '.png')

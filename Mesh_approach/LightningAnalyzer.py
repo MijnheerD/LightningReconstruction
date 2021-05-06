@@ -125,7 +125,7 @@ class Analyzer(LightningReconstructor):
         new_node = ListNode('n' + str(self.counter), pool, parent=branch)
         self.counter += 1
 
-        if len(next_points) > 0:
+        if len(next_points) > 1:
             self.find_branches(sym, next_points[0], new_node, previous=end_voxel)
             self.find_branches(sym, next_points[1], new_node, previous=end_voxel)
         else:

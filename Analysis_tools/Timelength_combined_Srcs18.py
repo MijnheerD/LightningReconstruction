@@ -4,11 +4,12 @@ from Lightcone_approach.LightningAnalyzer import Analyzer as LightningAnalyzer
 from Mesh_approach.LightningAnalyzer import Analyzer as MeshAnalyzer
 
 
-data = np.genfromtxt("../Data/data.txt", delimiter=",")
-x = data[:, 0]
+data = np.genfromtxt("../Data/Srcs18-oddSE.csv", comments='!', delimiter=",")
 y = data[:, 1]
-z = data[:, 2]
-t = data[:, 3]
+x = data[:, 2]
+z = data[:, 3]
+t = data[:, 4]
+chi2 = data[:, 5]
 
 dataname = 'combined'
 
@@ -16,23 +17,26 @@ lengths_lightcone = []
 lengths_mesh = []
 
 dataset = 'subset_1'
-xmin = x > 6000
-xmax = x < 9000
-ymin = y > -6000
-ymax = y < -3000
-zmin = z > 1500
-zmax = z < 5000
-selection = zmin * zmax * xmin * xmax * ymin * ymax
+xmin = x > 42000
+xmax = x < 44000
+ymin = y > -17000
+ymax = y < -14000
+zmin = z > 6000
+zmax = z < 8000
+tmin = t > 0.95
+tmax = t < 1.2
+chi2max = chi2 < 16
+selection = chi2max * zmin * zmax * ymin * ymax * xmin * xmax * tmin * tmax
 xcut = x[selection]
 ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
 analyzer_lightcone = LightningAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
-analyzer_lightcone.load_tree_from_file("Data_"+dataset+".pickle")
+analyzer_lightcone.load_tree_from_file("Data_Srcs18_"+dataset+".pickle")
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
-analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
+analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_lightcone.give_branch(i)
@@ -43,23 +47,26 @@ for i in range(analyzer_mesh.nr_of_branches()):
     lengths_mesh.append(max(branch_t) - min(branch_t))
 
 dataset = 'subset_2'
-xmin = x > 3000
-xmax = x < 7000
-ymin = y > -8000
-ymax = y < -6000
-zmin = z > 5000
-zmax = z < 10000
-selection = zmin * zmax * xmin * xmax * ymin * ymax
+xmin = x > 60000
+xmax = x < 70000
+ymin = y > -50000
+ymax = y < -40000
+zmin = z > 2000
+zmax = z < 5500
+tmin = t > 1.14
+tmax = t < 1.18
+chi2max = chi2 < 16
+selection = chi2max * zmin * zmax * ymin * ymax * xmin * xmax * tmin * tmax
 xcut = x[selection]
 ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
 analyzer_lightcone = LightningAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
-analyzer_lightcone.load_tree_from_file("Data_"+dataset+".pickle")
+analyzer_lightcone.load_tree_from_file("Data_Srcs18_"+dataset+".pickle")
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
-analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
+analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_lightcone.give_branch(i)
@@ -70,23 +77,26 @@ for i in range(analyzer_mesh.nr_of_branches()):
     lengths_mesh.append(max(branch_t) - min(branch_t))
 
 dataset = 'subset_3'
-xmin = x > -4500
-xmax = x < -3000
-ymin = y > -8500
-ymax = y < -5000
-zmin = z > 3000
-zmax = z < 5000
-selection = zmin * zmax * xmin * xmax * ymin * ymax
+xmin = x > 60000
+xmax = x < 70000
+ymin = y > -50000
+ymax = y < -40000
+zmin = z > 2000
+zmax = z < 5500
+tmin = t > 1.0
+tmax = t < 1.13
+chi2max = chi2 < 16
+selection = chi2max * zmin * zmax * ymin * ymax * xmin * xmax * tmin * tmax
 xcut = x[selection]
 ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
 analyzer_lightcone = LightningAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
-analyzer_lightcone.load_tree_from_file("Data_"+dataset+".pickle")
+analyzer_lightcone.load_tree_from_file("Data_Srcs18_"+dataset+".pickle")
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
-analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
+analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_lightcone.give_branch(i)
@@ -97,25 +107,26 @@ for i in range(analyzer_mesh.nr_of_branches()):
     lengths_mesh.append(max(branch_t) - min(branch_t))
 
 dataset = 'subset_4'
-xmin = x > 6000
-xmax = x < 10000
-ymin = y > -13000
-ymax = y < -10000
-zmin = z > 0
-zmax = z < 4000
-tmin = t > 1.15
-tmax = t < 1.17
-selection = zmin * zmax * xmin * xmax * ymin * ymax * tmin * tmax
+xmin = x > 60000
+xmax = x < 70000
+ymin = y > -50000
+ymax = y < -40000
+zmin = z > 2000
+zmax = z < 5500
+tmin = t > 1.22
+tmax = t < 1.30
+chi2max = chi2 < 16
+selection = chi2max * zmin * zmax * ymin * ymax * xmin * xmax * tmin * tmax
 xcut = x[selection]
 ycut = y[selection]
 zcut = z[selection]
 tcut = t[selection]
 
 analyzer_lightcone = LightningAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
-analyzer_lightcone.load_tree_from_file("Data_"+dataset+".pickle")
+analyzer_lightcone.load_tree_from_file("Data_Srcs18_"+dataset+".pickle")
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
-analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
+analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_lightcone.give_branch(i)
@@ -139,4 +150,4 @@ ax2.set_xlabel(r'Time length of the branch $(s)$')
 ax2.set_ylabel(r'Number of branches')
 ax2.set_title(r'Voxel algorithm')
 
-fig.savefig('Figures/timelength_data_' + dataname + '.png')
+fig.savefig('Figures/timelength_srcs18_' + dataname + '.png')

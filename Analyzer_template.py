@@ -270,17 +270,19 @@ class LightningReconstructor:
         y_plot = self.get_y()
         z_plot = self.get_z()
 
-        node_indices = self.give_branch_ind(branch)
+        node_indices, leaf_node = self.give_branch_ind(branch)
         x = [x_plot[ind] for ind in node_indices]
         y = [y_plot[ind] for ind in node_indices]
         z = [z_plot[ind] for ind in node_indices]
         t = [t_plot[ind] for ind in node_indices]
 
-        return t, x, y, z
+        return t, x, y, z, leaf_node
 
     def give_branch_ind(self, branch):
         node = findall_by_attr(self.tree, 'n' + str(branch))
-        return node[0]
+        if len(node[0].children) == 0:
+            return node[0], True
+        return node[0], False
 
     def nr_of_branches(self):
         return len(self.tree.descendants)
