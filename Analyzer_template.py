@@ -79,7 +79,7 @@ class LightningReconstructor:
         """
         return []
 
-    def plot_tree(self):
+    def plot_tree(self, lonely=True):
         t_plot = self.get_t()
         x_plot = self.get_x()
         y_plot = self.get_y()
@@ -115,14 +115,14 @@ class LightningReconstructor:
             ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node], [z_plot[ind] for ind in node],
                         color=color, marker='o')
             ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
-            counter += 1
-
-        for _, _, node in RenderTree(self.lonely):
-            ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node],
-                        [z_plot[ind] for ind in node], color='k', marker='s')
-            if node.name == 'lonely':
-                continue
-            ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
+            # counter += 1
+        if lonely:
+            for _, _, node in RenderTree(self.lonely):
+                ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node],
+                            [z_plot[ind] for ind in node], color='k', marker='s')
+                if node.name == 'lonely':
+                    continue
+                ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
 
         fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=[ax1, ax2], location='bottom', shrink=0.6)
         plt.show()

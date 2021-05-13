@@ -9,7 +9,7 @@ Idem for the min/max voxel size.
 #1 :
 #2 :
 #3 :
-#4 :
+#4 : min = 100, max = 300
 """
 
 from numpy import genfromtxt
@@ -45,7 +45,7 @@ tcut = t[selection]
 # analyzer_lightning.save_tree_to_file(dataname+".pickle")
 # analyzer_lightning.line_plot(dataname)
 
-analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=100)
+analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=100, max_voxel_size=300)
 analyzer_mesh.label()
 analyzer_mesh.save_tree_to_file(dataname+".pickle")
 analyzer_mesh.line_plot(dataname)
