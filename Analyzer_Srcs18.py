@@ -6,9 +6,9 @@ The d_cut parameter is a fine-tuning parameter, that depends on the dataset cons
 #4 : d_cut=200
 
 Idem for the min/max voxel size.
-#1 :
-#2 :
-#3 :
+#1 : min = 50, max = 100
+#2 : min = 50, max = 100
+#3 : min = 50, max = 100
 #4 : min = 100, max = 300
 """
 

@@ -296,7 +296,7 @@ class LightningReconstructor:
             print(treestr.ljust(8), len(node))
 
     def save_tree_to_file(self, file):
-        f = open('./Pickle_saves/' + self.type + '/' + file, 'wb')
+        f = open('../Pickle_saves/' + self.type + '/' + file, 'wb')
         pickle.dump(self.tree, f)
 
     def load_tree_from_file(self, file):

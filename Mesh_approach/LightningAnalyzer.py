@@ -5,6 +5,7 @@ TODO: incorporate lonely voxels -> do not use them in mst
 from numpy import concatenate, zeros, where, sum, setdiff1d
 from scipy.sparse import lil_matrix, diags
 from scipy.sparse.csgraph import minimum_spanning_tree
+from anytree import RenderTree
 from Analyzer_template import LightningReconstructor, ListNode
 from Mesh_approach.Mesh_octree import Octree
 
@@ -54,6 +55,27 @@ class Analyzer(LightningReconstructor):
 
     def get_t(self):
         return self.octree.t
+
+    def clean_tree(self):
+        for _, _, node in RenderTree(self.tree.children[0]):
+            if len(node.children) == 0 and len(node) < 20:
+                leaf_children = 0
+                for child in node.parent.children:
+                    if len(child.children) == 0:
+                        pass
+                if leaf_children < 2:
+                    node.parent.extend(node)
+                    node.parent = None
+
+        to_remove = []
+        for _, _, node in RenderTree(self.tree.children[0]):
+            if len(node.children) == 1:
+                node.children[0].extend(node)
+                to_remove.append(node)
+
+        for node in to_remove:
+            node.children[0].parent = node.parent
+            node.parent = None
 
     def find_begin_voxel(self):
         endpoints = where(sum(self.connections, axis=1) == 1)

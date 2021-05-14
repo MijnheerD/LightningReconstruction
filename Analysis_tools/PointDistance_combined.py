@@ -184,42 +184,32 @@ for i in range(analyzer_mesh.nr_of_branches()):
     altitudes_mesh.extend(abs(z_sorted[1:] + z_sorted[:-1]) / 2)
 
 fig = plt.figure(figsize=(16, 8))
-ax1 = fig.add_subplot(121, projection='3d')
-hist, xedges, yedges = np.histogram2d(distances_lightcone, altitudes_lightcone, bins=20)
+ax1 = fig.add_subplot(121)
+hist, xedges, yedges = np.histogram2d(distances_lightcone, altitudes_lightcone,
+                                      bins=[np.arange(min(distances_lightcone), max(distances_lightcone), 25),
+                                            np.arange(min(altitudes_lightcone), max(altitudes_lightcone), 200)])
+xpos, ypos = np.meshgrid(xedges[:-1] + (xedges[1]-xedges[0])/2, yedges[:-1] + (yedges[1]-yedges[0])/2, indexing="ij")
 
-# Construct arrays for the anchor positions of the 16 bars.
-xpos, ypos = np.meshgrid(xedges[:-1] + 0.25, yedges[:-1] + 0.25, indexing="ij")
-xpos = xpos.ravel()
-ypos = ypos.ravel()
-zpos = 0
-
-# Construct arrays with the dimensions for the 16 bars.
-dx = (max(distances_lightcone) - min(distances_lightcone)) / 20 * np.ones_like(zpos)
-dy = (max(altitudes_lightcone) - min(altitudes_lightcone)) / 20 * np.ones_like(zpos)
-dz = hist.ravel()
-
-ax1.bar3d(xpos, ypos, zpos, dx, dy, dz, zsort='average')
+pcm1 = ax1.pcolormesh(xpos, ypos, hist, shading='auto')
+ax1.set_xlim(left=0, right=400)
+ax1.set_ylim(top=6400)
 ax1.set_xlabel(r"Distance between subsequent points (m)")
 ax1.set_ylabel(r"Average of the altitudes (m)")
-ax1.set_zlabel(r"Number of occurrences")
+ax1.set_title(r'Light cone algorithm')
 
-ax2 = fig.add_subplot(122, projection='3d')
-hist, xedges, yedges = np.histogram2d(distances_mesh, altitudes_mesh, bins=20)
+ax2 = fig.add_subplot(122)
+hist, xedges, yedges = np.histogram2d(distances_mesh, altitudes_mesh,
+                                      bins=[np.arange(min(distances_mesh), max(distances_mesh), 25),
+                                            np.arange(min(altitudes_mesh), max(altitudes_mesh), 200)])
+xpos, ypos = np.meshgrid(xedges[:-1] + (xedges[1]-xedges[0])/2, yedges[:-1] + (yedges[1]-yedges[0])/2, indexing="ij")
 
-# Construct arrays for the anchor positions of the 16 bars.
-xpos, ypos = np.meshgrid(xedges[:-1] + 0.25, yedges[:-1] + 0.25, indexing="ij")
-xpos = xpos.ravel()
-ypos = ypos.ravel()
-zpos = 0
-
-# Construct arrays with the dimensions for the 16 bars.
-dx = (max(distances_mesh) - min(distances_mesh)) / 20 * np.ones_like(zpos)
-dy = (max(altitudes_mesh) - min(altitudes_mesh)) / 20 * np.ones_like(zpos)
-dz = hist.ravel()
-
-ax2.bar3d(xpos, ypos, zpos, dx, dy, dz, zsort='average')
+pcm2 = ax2.pcolormesh(xpos, ypos, hist, shading='auto')
+ax2.set_xlim(left=0, right=400)
+ax2.set_ylim(top=6400)
 ax2.set_xlabel(r"Distance between subsequent points (m)")
 ax2.set_ylabel(r"Average of the altitudes (m)")
-ax2.set_zlabel(r"Number of occurrences")
+ax2.set_title(r'Voxel algorithm')
 
+fig.colorbar(pcm1, ax=ax1)
+fig.colorbar(pcm2, ax=ax2)
 fig.savefig('Figures/pda_data_' + dataname + '.png')
