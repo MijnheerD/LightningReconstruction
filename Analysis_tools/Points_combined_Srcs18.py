@@ -35,8 +35,8 @@ tcut = t[selection]
 analyzer_lightcone = LightningAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file("Data_Srcs18_"+dataset+".pickle")
 
-analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
-analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + ".pickle")
+analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=100)
+analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + "_clean" + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
     node, _ = analyzer_lightcone.give_branch_ind(i)
@@ -65,8 +65,8 @@ tcut = t[selection]
 analyzer_lightcone = LightningAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file("Data_Srcs18_"+dataset+".pickle")
 
-analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
-analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + ".pickle")
+analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=100)
+analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + "_clean" + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
     node, _ = analyzer_lightcone.give_branch_ind(i)
@@ -95,8 +95,8 @@ tcut = t[selection]
 analyzer_lightcone = LightningAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file("Data_Srcs18_"+dataset+".pickle")
 
-analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
-analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + ".pickle")
+analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=100)
+analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + "_clean" + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
     node, _ = analyzer_lightcone.give_branch_ind(i)
@@ -125,8 +125,8 @@ tcut = t[selection]
 analyzer_lightcone = LightningAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file("Data_Srcs18_"+dataset+".pickle")
 
-analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
-analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + ".pickle")
+analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=100, max_voxel_size=300)
+analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + "_clean" + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
     node, _ = analyzer_lightcone.give_branch_ind(i)

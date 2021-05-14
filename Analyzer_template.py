@@ -279,10 +279,15 @@ class LightningReconstructor:
         return t, x, y, z, leaf_node
 
     def give_branch_ind(self, branch):
-        node = findall_by_attr(self.tree, 'n' + str(branch))
-        if len(node[0].children) == 0:
-            return node[0], True
-        return node[0], False
+        f"""
+        Returns the node named n{branch} if every branch is present. After cleaning this is not longer the case and the
+        function simply returns the {branch}th branch of the internal tree.
+        """
+        # node = findall_by_attr(self.tree, 'n' + str(branch))
+        node = self.tree.descendants[branch]
+        if len(node.children) == 0:
+            return node, True
+        return node, False
 
     def nr_of_branches(self):
         return len(self.tree.descendants)

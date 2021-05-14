@@ -43,7 +43,7 @@ for i in range(analyzer_lightcone.nr_of_branches()):
     events_lightcone.extend(t_branch)
 
 events_mesh = []
-bp_mesh= []
+bp_mesh = []
 for i in range(analyzer_mesh.nr_of_branches()):
     t_branch, _, _, _, _ = analyzer_mesh.give_branch(i)
     if i > 0:
