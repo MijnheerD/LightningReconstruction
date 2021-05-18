@@ -115,7 +115,6 @@ class LightningReconstructor:
             ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node], [z_plot[ind] for ind in node],
                         color=color, marker='o')
             ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
-            # counter += 1
         if lonely:
             for _, _, node in RenderTree(self.lonely):
                 ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node],
@@ -241,7 +240,6 @@ class LightningReconstructor:
             x_parents = x_positions[level - 1]
             for node in nodes_per_level[level]:
                 begin = t_plot[min(node)]
-                # end = t_plot[max(node)]
 
                 if level == 0:
                     x = 0
