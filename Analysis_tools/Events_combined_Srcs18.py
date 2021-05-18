@@ -51,7 +51,7 @@ for i in range(analyzer_mesh.nr_of_branches()):
     if i > 0:
         bp_mesh.append(min(t_branch))
     events_mesh.extend(t_branch)
-
+'''
 dataset = 'subset_2'
 xmin = x > 60000
 xmax = x < 70000
@@ -119,7 +119,7 @@ for i in range(analyzer_mesh.nr_of_branches()):
     if i > 0:
         bp_mesh.append(min(t_branch))
     events_mesh.extend(t_branch)
-
+'''
 dataset = 'subset_4'
 xmin = x > 60000
 xmax = x < 70000
@@ -174,4 +174,4 @@ ax2.set_xlabel(r'Time $(s)$')
 ax2.set_ylabel(r'Number of events')
 ax2.set_title(r'Voxel algorithm')
 
-fig.savefig('Figures/events_srcs18_' + dataname + '.png')
+fig.savefig('Figures/events_srcs18_' + dataname + '.png', bbox_inches='tight')

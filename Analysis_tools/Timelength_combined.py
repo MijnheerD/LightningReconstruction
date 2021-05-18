@@ -139,4 +139,4 @@ ax2.set_xlabel(r'Time length of the branch $(s)$')
 ax2.set_ylabel(r'Number of branches')
 ax2.set_title(r'Voxel algorithm')
 
-fig.savefig('Figures/timelength_data_' + dataname + '.png')
+fig.savefig('Figures/timelength_data_' + dataname + '.png', bbox_inches='tight')

@@ -128,15 +128,19 @@ for i in range(analyzer_mesh.nr_of_branches()):
 
 fig = plt.figure(figsize=(16, 8))
 ax1 = fig.add_subplot(121)
-ax1.hist(points_lightcone, bins=25)
+ax1.hist(points_lightcone, bins=np.linspace(0, 300, 30))
+ax1.set_xlim(left=0, right=300)
+ax1.set_ylim(top=35)
 ax1.set_xlabel(r'Number of points inside the branch')
 ax1.set_ylabel(r'Number of branches')
 ax1.set_title(r'Light cone algorithm')
 
 ax2 = fig.add_subplot(122)
-ax2.hist(points_mesh, bins=25)
+ax2.hist(points_mesh, bins=np.linspace(0, 300, 30))
+ax2.set_xlim(left=0, right=300)
+ax2.set_ylim(top=35)
 ax2.set_xlabel(r'Number of points inside the branch')
 ax2.set_ylabel(r'Number of branches')
 ax2.set_title(r'Voxel algorithm')
 
-fig.savefig('Figures/points_data_' + dataname + '.png')
+fig.savefig('Figures/points_data_' + dataname + '.png', bbox_inches='tight')

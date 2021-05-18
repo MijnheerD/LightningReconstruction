@@ -61,7 +61,7 @@ for i in range(analyzer_mesh.nr_of_branches()):
     distances = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
     distances_mesh.extend(distances)
     altitudes_mesh.extend(abs(z_sorted[1:] + z_sorted[:-1]) / 2)
-
+'''
 dataset = 'subset_2'
 xmin = x > 60000
 xmax = x < 70000
@@ -149,7 +149,7 @@ for i in range(analyzer_mesh.nr_of_branches()):
     distances = np.sqrt(dx ** 2 + dy ** 2 + dz ** 2)
     distances_mesh.extend(distances)
     altitudes_mesh.extend(abs(z_sorted[1:] + z_sorted[:-1]) / 2)
-
+'''
 dataset = 'subset_4'
 xmin = x > 60000
 xmax = x < 70000
@@ -195,15 +195,25 @@ for i in range(analyzer_mesh.nr_of_branches()):
     altitudes_mesh.extend(abs(z_sorted[1:] + z_sorted[:-1]) / 2)
 
 
+print(f'Light cone has {len(distances_lightcone)} data points')
+print(f'Voxel has {len(distances_mesh)} data points')
+
+dist = np.array(distances_mesh)
+alt = np.array(altitudes_mesh)
+print(f'{len(dist[dist >= 0.00001])}')
+
+distances_mesh = dist[dist >= 0.00001]
+altitudes_mesh = alt[dist >= 0.00001]
+
 fig = plt.figure(figsize=(16, 8))
 ax1 = fig.add_subplot(121)
 hist, xedges, yedges = np.histogram2d(distances_lightcone, altitudes_lightcone,
-                                      bins=[np.arange(min(distances_lightcone), max(distances_lightcone), 25),
-                                            np.arange(min(altitudes_lightcone), max(altitudes_lightcone), 200)])
+                                      bins=[np.arange(0, max(distances_lightcone), 5),
+                                            np.arange(min(altitudes_lightcone), max(altitudes_lightcone), 100)])
 xpos, ypos = np.meshgrid(xedges[:-1] + (xedges[1]-xedges[0])/2, yedges[:-1] + (yedges[1]-yedges[0])/2, indexing="ij")
 
 pcm1 = ax1.pcolormesh(xpos, ypos, hist, shading='auto')
-ax1.set_xlim(left=0, right=400)
+ax1.set_xlim(left=0, right=100)
 ax1.set_ylim(top=6400)
 ax1.set_xlabel(r"Distance between subsequent points (m)")
 ax1.set_ylabel(r"Average of the altitudes (m)")
@@ -211,12 +221,12 @@ ax1.set_title(r'Light cone algorithm')
 
 ax2 = fig.add_subplot(122)
 hist, xedges, yedges = np.histogram2d(distances_mesh, altitudes_mesh,
-                                      bins=[np.arange(min(distances_mesh), max(distances_mesh), 25),
-                                            np.arange(min(altitudes_mesh), max(altitudes_mesh), 200)])
+                                      bins=[np.arange(0, max(distances_mesh), 5),
+                                            np.arange(min(altitudes_mesh), max(altitudes_mesh), 100)])
 xpos, ypos = np.meshgrid(xedges[:-1] + (xedges[1]-xedges[0])/2, yedges[:-1] + (yedges[1]-yedges[0])/2, indexing="ij")
 
 pcm2 = ax2.pcolormesh(xpos, ypos, hist, shading='auto')
-ax2.set_xlim(left=0, right=400)
+ax2.set_xlim(left=0, right=100)
 ax2.set_ylim(top=6400)
 ax2.set_xlabel(r"Distance between subsequent points (m)")
 ax2.set_ylabel(r"Average of the altitudes (m)")
@@ -224,4 +234,4 @@ ax2.set_title(r'Voxel algorithm')
 
 fig.colorbar(pcm1, ax=ax1)
 fig.colorbar(pcm2, ax=ax2)
-fig.savefig('Figures/pda_srcs18_' + dataname + '.png')
+fig.savefig('Figures/pda_srcs18_' + dataname + '.png', bbox_inches='tight')

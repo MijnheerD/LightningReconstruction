@@ -45,7 +45,7 @@ for i in range(analyzer_lightcone.nr_of_branches()):
 for i in range(analyzer_mesh.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_mesh.give_branch(i)
     lengths_mesh.append(max(branch_t) - min(branch_t))
-
+'''
 dataset = 'subset_2'
 xmin = x > 60000
 xmax = x < 70000
@@ -105,7 +105,7 @@ for i in range(analyzer_lightcone.nr_of_branches()):
 for i in range(analyzer_mesh.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_mesh.give_branch(i)
     lengths_mesh.append(max(branch_t) - min(branch_t))
-
+'''
 dataset = 'subset_4'
 xmin = x > 60000
 xmax = x < 70000
@@ -150,4 +150,4 @@ ax2.set_xlabel(r'Time length of the branch $(s)$')
 ax2.set_ylabel(r'Number of branches')
 ax2.set_title(r'Voxel algorithm')
 
-fig.savefig('Figures/timelength_srcs18_' + dataname + '.png')
+fig.savefig('Figures/timelength_srcs18_' + dataname + '.png', bbox_inches='tight')
