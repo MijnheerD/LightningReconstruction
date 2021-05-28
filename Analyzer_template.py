@@ -3,6 +3,7 @@ import numpy as np  # Only necessary for FT
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import matplotlib.cm as cm
+from matplotlib.collections import LineCollection
 from anytree import NodeMixin, RenderTree, LevelGroupOrderIter
 from anytree.search import findall_by_attr
 
@@ -231,13 +232,18 @@ class LightningReconstructor:
         x_positions = [[0] * len(el) for el in nodes_per_level]
 
         n = len(nodes_per_level)
-        min_displacement = 10 + self.counter * 10
+        min_displacement = 10 + n * 10
 
-        fig = plt.figure(3, figsize=(10, 5))
+        if self.type == 'Lightcone':
+            fig = plt.figure(3, figsize=(3*n, 2*n))
+        elif self.type == 'Mesh':
+            fig = plt.figure(4, figsize=(3 * n, 2 * n))
+        else:
+            fig = plt.figure(5, figsize=(3 * n, 2 * n))
         ax = fig.add_subplot(111)
-        ax.set_xlabel('Time')
+        ax.set_xlabel(r'Time $(s)$')
 
-        for level in range(len(nodes_per_level)):
+        for level in range(n):
             x_append = []
             x_parents = x_positions[level - 1]
             for node in nodes_per_level[level]:
