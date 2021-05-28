@@ -6,7 +6,6 @@ import matplotlib.cm as cm
 from anytree import NodeMixin, RenderTree, LevelGroupOrderIter
 from anytree.search import findall_by_attr
 
-
 LIST_OF_COLORS = ['#153e90', '#54e346', '#581845', '#825959', '#89937f', '#0e49b5', '#4e89ae', '#f1fa3c',
                   '#e28316', '#43658b', '#aa26da', '#fa163f', '#898d90', '#fa26a0', '#05dfd7', '#a3f7bf',
                   '#d68060', '#532e1c', '#59886b', '#db6400']
@@ -79,7 +78,7 @@ class LightningReconstructor:
         """
         return []
 
-    def plot_tree(self, lonely=True):
+    def plot_tree(self, filename=None, lonely=True, text=False):
         t_plot = self.get_t()
         x_plot = self.get_x()
         y_plot = self.get_y()
@@ -114,7 +113,8 @@ class LightningReconstructor:
             color = mcolors.hex2color(LIST_OF_COLORS[int(counter % len(LIST_OF_COLORS))])
             ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node], [z_plot[ind] for ind in node],
                         color=color, marker='o')
-            ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
+            if text:
+                ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
         if lonely:
             for _, _, node in RenderTree(self.lonely):
                 ax2.scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node],
@@ -123,8 +123,10 @@ class LightningReconstructor:
                     continue
                 ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
 
-        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=[ax1, ax2], location='bottom', shrink=0.6)
+        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=[ax1, ax2], location='left', shrink=0.6, pad=0.01)
         plt.show()
+        if filename is not None:
+            fig.savefig('Treeplots/' + self.type + '/' + filename + '.png', bbox_inches='tight')
 
     def identify_data(self, branch=0):
         t_plot = self.get_t()
@@ -138,7 +140,7 @@ class LightningReconstructor:
             z = z_plot
             t = t_plot
         else:
-            node = findall_by_attr(self.tree, 'n'+str(branch))
+            node = findall_by_attr(self.tree, 'n' + str(branch))
             x = [x_plot[ind] for ind in node[0]]
             y = [y_plot[ind] for ind in node[0]]
             z = [z_plot[ind] for ind in node[0]]
@@ -247,13 +249,13 @@ class LightningReconstructor:
                 else:
                     ind = nodes_per_level[level - 1].index(node.parent)
                     x = x_parents[ind] + (-1) ** (node.parent.children.index(node)) * 2 ** (
-                                n - level) * min_displacement
+                            n - level) * min_displacement
                     x_append.append(x)
                     ax.plot([begin, begin], [x_parents[ind], x], linestyle=':', color='black')
 
                 counter = int(node.name[1:])
                 color = mcolors.hex2color(LIST_OF_COLORS[int(counter % len(LIST_OF_COLORS))])
-                ax.scatter(t_plot[node], [x]*len(node), color=color)
+                ax.scatter(t_plot[node], [x] * len(node), color=color)
                 # ax.text(t_plot[node[0]]-0.001, x, f'{node.name}')
             x_positions[level] = x_append
 
@@ -303,5 +305,5 @@ class LightningReconstructor:
         pickle.dump(self.tree, f)
 
     def load_tree_from_file(self, file):
-        f = open('../Pickle_saves/' + self.type + '/' + file, 'rb')
+        f = open('./Pickle_saves/' + self.type + '/' + file, 'rb')
         self.tree = pickle.load(f)
