@@ -129,6 +129,61 @@ class LightningReconstructor:
         if filename is not None:
             fig.savefig('Treeplots/' + self.type + '/' + filename + '.png', bbox_inches='tight')
 
+    def plot_tree_projections(self, filename=None):
+        x_plot = self.get_x()
+        y_plot = self.get_y()
+        z_plot = self.get_z()
+
+        if self.type == 'Lightcone':
+            fig = plt.figure(1, figsize=(8, 8))
+            fig.suptitle('Branches selected by the light cone algorithm')
+
+        elif self.type == 'Mesh':
+            fig = plt.figure(2, figsize=(8, 8))
+            fig.suptitle('Branches selected by the voxel algorithm')
+        else:
+            fig = plt.figure(3, figsize=(8, 8))
+            fig.suptitle('Branches selected by the algorithm')
+
+        # Create axes and set the ticks to be inside the axes area
+        ax = [fig.add_subplot(2, 2, 1), fig.add_subplot(2, 2, 3), fig.add_subplot(2, 2, 4)]
+        for a in ax:
+            a.tick_params(axis="y", direction="in", right=True, top=True)
+            a.tick_params(axis="x", direction="in", right=True, top=True)
+
+        # Remove space between axes and share the relevant ax
+        fig.subplots_adjust(wspace=0, hspace=0)
+        ax[0].sharex(ax[1])
+        ax[1].sharey(ax[2])
+
+        # Set tick labels false on the shared ax
+        plt.setp(ax[0].get_xticklabels(), visible=False)
+        plt.setp(ax[2].get_yticklabels(), visible=False)
+
+        # Add grid to central axis for better read ax values on outer axes
+        ax[1].grid(linestyle='dotted')
+
+        # Add all the labels
+        ax[0].set_ylabel('Height [m]')
+        ax[1].set_ylabel('Northing [m]')
+        ax[1].set_xlabel('Easting [m]')
+        ax[2].set_xlabel('Height [m]')
+
+        for _, _, node in RenderTree(self.tree.children[0]):
+            counter = int(node.name[1:])
+            color = mcolors.hex2color(LIST_OF_COLORS[int(counter % len(LIST_OF_COLORS))])
+            ax[0].scatter([x_plot[ind] for ind in node], [z_plot[ind] for ind in node],
+                          marker='.', s=5, color=color)
+            ax[1].scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node],
+                          marker='.', s=5, color=color)
+            ax[2].scatter([z_plot[ind] for ind in node], [y_plot[ind] for ind in node],
+                          marker='.', s=5, color=color)
+
+        if filename is not None:
+            fig.savefig('Projections/' + self.type + '/' + filename + '.png', bbox_inches='tight')
+        else:
+            plt.show()
+
     def identify_data(self, branch=0):
         t_plot = self.get_t()
         x_plot = self.get_x()
@@ -177,7 +232,7 @@ class LightningReconstructor:
         y_plot = self.get_y()
         z_plot = self.get_z()
 
-        fig = plt.figure(2, figsize=(20, 10))
+        fig = plt.figure(10, figsize=(20, 10))
 
         grid = np.array([t_plot, x_plot, y_plot, z_plot])
         fgrid = np.fft.fftn(grid)
@@ -235,13 +290,14 @@ class LightningReconstructor:
         min_displacement = 10 + n * 10
 
         if self.type == 'Lightcone':
-            fig = plt.figure(3, figsize=(3*n, 2*n))
+            fig = plt.figure(4, figsize=(8, 11))
         elif self.type == 'Mesh':
-            fig = plt.figure(4, figsize=(3 * n, 2 * n))
+            fig = plt.figure(5, figsize=(8, 11))
         else:
-            fig = plt.figure(5, figsize=(3 * n, 2 * n))
+            fig = plt.figure(6, figsize=(8, 11))
         ax = fig.add_subplot(111)
-        ax.set_xlabel(r'Time $(s)$')
+        ax.set_ylabel(r'Time $(s)$')
+        ax.invert_yaxis()
 
         for level in range(n):
             x_append = []
@@ -257,16 +313,16 @@ class LightningReconstructor:
                     x = x_parents[ind] + (-1) ** (node.parent.children.index(node)) * 2 ** (
                             n - level) * min_displacement
                     x_append.append(x)
-                    ax.plot([begin, begin], [x_parents[ind], x], linestyle=':', color='black')
+                    ax.plot([x_parents[ind], x], [begin, begin], linestyle=':', color='black')
 
                 counter = int(node.name[1:])
                 color = mcolors.hex2color(LIST_OF_COLORS[int(counter % len(LIST_OF_COLORS))])
-                ax.scatter(t_plot[node], [x] * len(node), color=color)
+                ax.scatter([x] * len(node), t_plot[node], color=color)
                 # ax.text(t_plot[node[0]]-0.001, x, f'{node.name}')
             x_positions[level] = x_append
 
-        ax.tick_params(axis='y', which='both', right=False, left=False, labelleft=False)
-        plt.show()
+        ax.tick_params(axis='x', which='both', top=False, bottom=False, labelbottom=False)
+        # plt.show()
         if filename is not None:
             fig.savefig('Lineplots/' + self.type + '/' + filename + '.png', bbox_inches='tight')
 
