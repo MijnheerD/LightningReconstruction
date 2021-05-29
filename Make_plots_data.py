@@ -24,10 +24,12 @@ tcut = t[selection]
 
 analyzer_lightcone = LightconeAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file(dataname+".pickle")
-analyzer_lightcone.plot_tree(dataname, lonely=False)
-analyzer_lightcone.line_plot(dataname)
+# analyzer_lightcone.plot_tree(dataname, lonely=False)
+# analyzer_lightcone.plot_tree_projections(dataname)
+# analyzer_lightcone.line_plot(dataname)
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 analyzer_mesh.load_tree_from_file(dataname+".pickle")
-analyzer_mesh.plot_tree(dataname, lonely=False)
-analyzer_mesh.line_plot(dataname)
+# analyzer_mesh.plot_tree(dataname, lonely=False)
+# analyzer_mesh.plot_tree_projections(dataname)
+# analyzer_mesh.line_plot(dataname)

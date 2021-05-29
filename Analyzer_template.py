@@ -164,19 +164,19 @@ class LightningReconstructor:
         ax[1].grid(linestyle='dotted')
 
         # Add all the labels
-        ax[0].set_ylabel('Height [m]')
-        ax[1].set_ylabel('Northing [m]')
-        ax[1].set_xlabel('Easting [m]')
-        ax[2].set_xlabel('Height [m]')
+        ax[0].set_ylabel('Height [km]')
+        ax[1].set_ylabel('Northing [km]')
+        ax[1].set_xlabel('Easting [km]')
+        ax[2].set_xlabel('Height [km]')
 
         for _, _, node in RenderTree(self.tree.children[0]):
             counter = int(node.name[1:])
             color = mcolors.hex2color(LIST_OF_COLORS[int(counter % len(LIST_OF_COLORS))])
-            ax[0].scatter([x_plot[ind] for ind in node], [z_plot[ind] for ind in node],
+            ax[0].scatter([x_plot[ind]/1000 for ind in node], [z_plot[ind]/1000 for ind in node],
                           marker='.', s=5, color=color)
-            ax[1].scatter([x_plot[ind] for ind in node], [y_plot[ind] for ind in node],
+            ax[1].scatter([x_plot[ind]/1000 for ind in node], [y_plot[ind]/1000 for ind in node],
                           marker='.', s=5, color=color)
-            ax[2].scatter([z_plot[ind] for ind in node], [y_plot[ind] for ind in node],
+            ax[2].scatter([z_plot[ind]/1000 for ind in node], [y_plot[ind]/1000 for ind in node],
                           marker='.', s=5, color=color)
 
         if filename is not None:
