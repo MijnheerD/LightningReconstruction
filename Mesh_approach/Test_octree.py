@@ -20,15 +20,15 @@ z = data[:, 3]
 t = data[:, 4]
 chi2 = data[:, 5]
 
-dataname = 'Srcs18_subset_4'
+dataname = 'Srcs18_subset_3'
 xmin = x > 60000
 xmax = x < 70000
 ymin = y > -50000
 ymax = y < -40000
 zmin = z > 2000
 zmax = z < 5500
-tmin = t > 1.22
-tmax = t < 1.30
+tmin = t > 1.0
+tmax = t < 1.13
 chi2max = chi2 < 16
 selection = chi2max * zmin * zmax * ymin * ymax * xmin * xmax * tmin * tmax
 
@@ -39,4 +39,5 @@ tcut = t[selection]
 
 tree = Analyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 tree.octree.refine(min_side=50, max_side=100)
-tree.octree.voxel_plot()
+# tree.octree.voxel_plot()
+tree.octree.make_voxel_graph("Graph_"+dataname)
