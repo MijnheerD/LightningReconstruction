@@ -311,5 +311,5 @@ class LightningReconstructor:
         pickle.dump(self.tree, f)
 
     def load_tree_from_file(self, file):
-        f = open('./Pickle_saves/' + self.type + '/' + file, 'rb')
+        f = open('../Pickle_saves/' + self.type + '/' + file, 'rb')
         self.tree = pickle.load(f)
