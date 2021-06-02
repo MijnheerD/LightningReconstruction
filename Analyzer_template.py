@@ -85,23 +85,31 @@ class LightningReconstructor:
         y_plot = self.get_y()
         z_plot = self.get_z()
 
-        fig = plt.figure(1, figsize=(20, 10))
+        if self.type == 'Lightcone':
+            fig = plt.figure(1, figsize=(6, 10))
+            algo = 'light cone'
+        elif self.type == 'Mesh':
+            fig = plt.figure(2, figsize=(6, 10))
+            algo = 'voxel'
+        else:
+            fig = plt.figure(3, figsize=(6, 10))
+            algo = ''
 
         cmap = cm.plasma
         norm = mcolors.Normalize(vmin=t_plot[0], vmax=t_plot[-1])
 
-        ax1 = fig.add_subplot(121, projection='3d')
+        ax1 = fig.add_subplot(211, projection='3d')
         ax1.scatter(x_plot, y_plot, z_plot, marker='^', c=t_plot, cmap=cmap, norm=norm)
         ax1.set_xlabel('X')
         ax1.set_ylabel('Y')
         ax1.set_zlabel('Z')
         ax1.set_title('Time ordered original data')
 
-        ax2 = fig.add_subplot(122, projection='3d')
+        ax2 = fig.add_subplot(212, projection='3d')
         ax2.set_xlabel('X')
         ax2.set_ylabel('Y')
         ax2.set_zlabel('Z')
-        ax2.set_title('Branches selected by the algorithm')
+        ax2.set_title(f'Branches selected by the {algo} algorithm')
         (left, right) = ax1.get_xlim3d()
         ax2.set_xlim3d(left, right)
         (left, right) = ax1.get_ylim3d()
@@ -124,10 +132,13 @@ class LightningReconstructor:
                     continue
                 ax2.text(x_plot[node[0]], y_plot[node[0]], z_plot[node[0]], f'{node.name}')
 
-        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=[ax1, ax2], location='left', shrink=0.6, pad=0.01)
-        plt.show()
+        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), ax=ax1, location='left', shrink=0.8, pad=0.01)
         if filename is not None:
             fig.savefig('Treeplots/' + self.type + '/' + filename + '.png', bbox_inches='tight')
+        else:
+            plt.show()
+
+        plt.close(fig)
 
     def plot_tree_projections(self, filename=None):
         x_plot = self.get_x()
@@ -183,6 +194,8 @@ class LightningReconstructor:
             fig.savefig('Projections/' + self.type + '/' + filename + '.png', bbox_inches='tight')
         else:
             plt.show()
+
+        plt.close(fig)
 
     def identify_data(self, branch=0):
         t_plot = self.get_t()
@@ -322,9 +335,12 @@ class LightningReconstructor:
             x_positions[level] = x_append
 
         ax.tick_params(axis='x', which='both', top=False, bottom=False, labelbottom=False)
-        # plt.show()
         if filename is not None:
             fig.savefig('Lineplots/' + self.type + '/' + filename + '.png', bbox_inches='tight')
+        else:
+            plt.show()
+
+        plt.close(fig)
 
     def give_branch(self, branch):
         t_plot = self.get_t()
