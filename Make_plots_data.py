@@ -23,14 +23,14 @@ tcut = t[selection]
 
 analyzer_lightcone = LightconeAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file("Data_" + dataset + ".pickle")
-analyzer_lightcone.plot_tree("Data_" + dataset, lonely=False)
-analyzer_lightcone.line_plot("Data_" + dataset)
+# analyzer_lightcone.plot_tree("Data_" + dataset, lonely=False)
+# analyzer_lightcone.line_plot("Data_" + dataset)
 # analyzer_lightcone.plot_tree_projections("Data_" + dataset)
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
-analyzer_mesh.plot_tree("Data_" + dataset, lonely=False)
-analyzer_mesh.line_plot("Data_" + dataset)
+# analyzer_mesh.plot_tree("Data_" + dataset, lonely=False)
+# analyzer_mesh.line_plot("Data_" + dataset)
 # analyzer_mesh.plot_tree_projections("Data_" + dataset)
 
 dataset = 'subset_2'
@@ -48,15 +48,15 @@ tcut = t[selection]
 
 analyzer_lightcone = LightconeAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file("Data_" + dataset + ".pickle")
-analyzer_lightcone.plot_tree("Data_" + dataset, lonely=False)
-analyzer_lightcone.line_plot("Data_" + dataset)
-# analyzer_lightcone.plot_tree_projections("Data_" + dataset)
+# analyzer_lightcone.plot_tree("Data_" + dataset, lonely=False)
+# analyzer_lightcone.line_plot("Data_" + dataset)
+analyzer_lightcone.plot_tree_projections("Data_" + dataset)
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
-analyzer_mesh.plot_tree("Data_" + dataset, lonely=False)
-analyzer_mesh.line_plot("Data_" + dataset)
-# analyzer_mesh.plot_tree_projections("Data_" + dataset)
+# analyzer_mesh.plot_tree("Data_" + dataset, lonely=False)
+# analyzer_mesh.line_plot("Data_" + dataset)
+analyzer_mesh.plot_tree_projections("Data_" + dataset)
 
 dataset = 'subset_3'
 xmin = x > -4500
@@ -73,15 +73,15 @@ tcut = t[selection]
 
 analyzer_lightcone = LightconeAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file("Data_" + dataset + ".pickle")
-analyzer_lightcone.plot_tree("Data_" + dataset, lonely=False)
-analyzer_lightcone.line_plot("Data_" + dataset)
-# analyzer_lightcone.plot_tree_projections("Data_" + dataset)
+# analyzer_lightcone.plot_tree("Data_" + dataset, lonely=False)
+# analyzer_lightcone.line_plot("Data_" + dataset)
+analyzer_lightcone.plot_tree_projections("Data_" + dataset)
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
-analyzer_mesh.plot_tree("Data_" + dataset, lonely=False)
-analyzer_mesh.line_plot("Data_" + dataset)
-# analyzer_mesh.plot_tree_projections("Data_" + dataset)
+# analyzer_mesh.plot_tree("Data_" + dataset, lonely=False)
+# analyzer_mesh.line_plot("Data_" + dataset)
+analyzer_mesh.plot_tree_projections("Data_" + dataset)
 
 dataset = 'subset_4'
 xmin = x > 6000
@@ -100,12 +100,12 @@ tcut = t[selection]
 
 analyzer_lightcone = LightconeAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file("Data_" + dataset + ".pickle")
-analyzer_lightcone.plot_tree("Data_" + dataset, lonely=False)
-analyzer_lightcone.line_plot("Data_" + dataset)
-# analyzer_lightcone.plot_tree_projections("Data_" + dataset)
+# analyzer_lightcone.plot_tree("Data_" + dataset, lonely=False)
+# analyzer_lightcone.line_plot("Data_" + dataset)
+analyzer_lightcone.plot_tree_projections("Data_" + dataset)
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
-analyzer_mesh.plot_tree("Data_" + dataset, lonely=False)
-analyzer_mesh.line_plot("Data_" + dataset)
-# analyzer_mesh.plot_tree_projections("Data_" + dataset)
+# analyzer_mesh.plot_tree("Data_" + dataset, lonely=False)
+# analyzer_mesh.line_plot("Data_" + dataset)
+analyzer_mesh.plot_tree_projections("Data_" + dataset)

@@ -27,15 +27,15 @@ tcut = t[selection]
 
 analyzer_lightcone = LightconeAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file("Data_Srcs18_"+dataset+".pickle")
-analyzer_lightcone.plot_tree("Srcs18_" + dataset, lonely=False)
-analyzer_lightcone.line_plot("Srcs18_" + dataset)
-# analyzer_lightcone.plot_tree_projections("Srcs18_" + dataset)
+# analyzer_lightcone.plot_tree("Srcs18_" + dataset, lonely=False)
+# analyzer_lightcone.line_plot("Srcs18_" + dataset)
+analyzer_lightcone.plot_tree_projections("Srcs18_" + dataset)
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + "_clean" + ".pickle")
-analyzer_mesh.plot_tree("Srcs18_" + dataset + "_clean", lonely=False)
-analyzer_mesh.line_plot("Srcs18_" + dataset + "_clean")
-# analyzer_mesh.plot_tree_projections("Srcs18_" + dataset + "_clean")
+# analyzer_mesh.plot_tree("Srcs18_" + dataset + "_clean", lonely=False)
+# analyzer_mesh.line_plot("Srcs18_" + dataset + "_clean")
+analyzer_mesh.plot_tree_projections("Srcs18_" + dataset + "_clean")
 
 dataset = 'subset_2'
 xmin = x > 60000
@@ -55,15 +55,15 @@ tcut = t[selection]
 
 analyzer_lightcone = LightconeAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file("Data_Srcs18_"+dataset+".pickle")
-analyzer_lightcone.plot_tree("Srcs18_" + dataset, lonely=False)
-analyzer_lightcone.line_plot("Srcs18_" + dataset)
-# analyzer_lightcone.plot_tree_projections("Srcs18_" + dataset)
+# analyzer_lightcone.plot_tree("Srcs18_" + dataset, lonely=False)
+# analyzer_lightcone.line_plot("Srcs18_" + dataset)
+analyzer_lightcone.plot_tree_projections("Srcs18_" + dataset)
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + "_clean" + ".pickle")
-analyzer_mesh.plot_tree("Srcs18_" + dataset + "_clean", lonely=False)
-analyzer_mesh.line_plot("Srcs18_" + dataset + "_clean")
-# analyzer_mesh.plot_tree_projections("Srcs18_" + dataset + "_clean")
+# analyzer_mesh.plot_tree("Srcs18_" + dataset + "_clean", lonely=False)
+# analyzer_mesh.line_plot("Srcs18_" + dataset + "_clean")
+analyzer_mesh.plot_tree_projections("Srcs18_" + dataset + "_clean")
 
 dataset = 'subset_3'
 xmin = x > 60000
@@ -83,15 +83,15 @@ tcut = t[selection]
 
 analyzer_lightcone = LightconeAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file("Data_Srcs18_"+dataset+".pickle")
-analyzer_lightcone.plot_tree("Srcs18_" + dataset, lonely=False)
-analyzer_lightcone.line_plot("Srcs18_" + dataset)
-# analyzer_lightcone.plot_tree_projections("Srcs18_" + dataset)
+# analyzer_lightcone.plot_tree("Srcs18_" + dataset, lonely=False)
+# analyzer_lightcone.line_plot("Srcs18_" + dataset)
+analyzer_lightcone.plot_tree_projections("Srcs18_" + dataset)
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + "_clean" + ".pickle")
-analyzer_mesh.plot_tree("Srcs18_" + dataset + "_clean", lonely=False)
-analyzer_mesh.line_plot("Srcs18_" + dataset + "_clean")
-# analyzer_mesh.plot_tree_projections("Srcs18_" + dataset + "_clean")
+# analyzer_mesh.plot_tree("Srcs18_" + dataset + "_clean", lonely=False)
+# analyzer_mesh.line_plot("Srcs18_" + dataset + "_clean")
+analyzer_mesh.plot_tree_projections("Srcs18_" + dataset + "_clean")
 
 dataset = 'subset_4'
 xmin = x > 60000
@@ -111,12 +111,12 @@ tcut = t[selection]
 
 analyzer_lightcone = LightconeAnalyzer(tcut, xcut, ycut, zcut, -1, weights=(1, 0), d_cut=1000)
 analyzer_lightcone.load_tree_from_file("Data_Srcs18_"+dataset+".pickle")
-analyzer_lightcone.plot_tree("Srcs18_" + dataset, lonely=False)
-analyzer_lightcone.line_plot("Srcs18_" + dataset)
+# analyzer_lightcone.plot_tree("Srcs18_" + dataset, lonely=False)
+# analyzer_lightcone.line_plot("Srcs18_" + dataset)
 # analyzer_lightcone.plot_tree_projections("Srcs18_" + dataset)
 
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=200)
 analyzer_mesh.load_tree_from_file("Srcs18_" + dataset + "_clean" + ".pickle")
-analyzer_mesh.plot_tree("Srcs18_" + dataset + "_clean", lonely=False)
-analyzer_mesh.line_plot("Srcs18_" + dataset + "_clean")
+# analyzer_mesh.plot_tree("Srcs18_" + dataset + "_clean", lonely=False)
+# analyzer_mesh.line_plot("Srcs18_" + dataset + "_clean")
 # analyzer_mesh.plot_tree_projections("Srcs18_" + dataset + "_clean")
