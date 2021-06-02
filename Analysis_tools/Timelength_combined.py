@@ -36,11 +36,11 @@ analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_lightcone.give_branch(i)
-    lengths_lightcone.append(max(branch_t) - min(branch_t))
+    lengths_lightcone.append(np.percentile(branch_t, 95) - np.percentile(branch_t, 5))
 
 for i in range(analyzer_mesh.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_mesh.give_branch(i)
-    lengths_mesh.append(max(branch_t) - min(branch_t))
+    lengths_mesh.append(np.percentile(branch_t, 95) - np.percentile(branch_t, 5))
 
 dataset = 'subset_2'
 xmin = x > 3000
@@ -63,11 +63,11 @@ analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_lightcone.give_branch(i)
-    lengths_lightcone.append(max(branch_t) - min(branch_t))
+    lengths_lightcone.append(np.percentile(branch_t, 95) - np.percentile(branch_t, 5))
 
 for i in range(analyzer_mesh.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_mesh.give_branch(i)
-    lengths_mesh.append(max(branch_t) - min(branch_t))
+    lengths_mesh.append(np.percentile(branch_t, 95) - np.percentile(branch_t, 5))
 
 dataset = 'subset_3'
 xmin = x > -4500
@@ -90,11 +90,11 @@ analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_lightcone.give_branch(i)
-    lengths_lightcone.append(max(branch_t) - min(branch_t))
+    lengths_lightcone.append(np.percentile(branch_t, 95) - np.percentile(branch_t, 5))
 
 for i in range(analyzer_mesh.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_mesh.give_branch(i)
-    lengths_mesh.append(max(branch_t) - min(branch_t))
+    lengths_mesh.append(np.percentile(branch_t, 95) - np.percentile(branch_t, 5))
 
 dataset = 'subset_4'
 xmin = x > 6000
@@ -119,24 +119,28 @@ analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
 
 for i in range(analyzer_lightcone.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_lightcone.give_branch(i)
-    lengths_lightcone.append(max(branch_t) - min(branch_t))
+    lengths_lightcone.append(np.percentile(branch_t, 95) - np.percentile(branch_t, 5))
 
 for i in range(analyzer_mesh.nr_of_branches()):
     branch_t, _, _, _, _ = analyzer_mesh.give_branch(i)
-    lengths_mesh.append(max(branch_t) - min(branch_t))
+    lengths_mesh.append(np.percentile(branch_t, 95) - np.percentile(branch_t, 5))
 
+lengths_lightcone = np.array(lengths_lightcone)
+lengths_lightcone = lengths_lightcone[lengths_lightcone<0.01]
+lengths_mesh = np.array(lengths_mesh)
+lengths_mesh = lengths_mesh[lengths_mesh<0.01]
 
 fig = plt.figure(figsize=(16, 8))
 ax1 = fig.add_subplot(121)
-ax1.hist(lengths_lightcone, bins=25)
+ax1.hist(lengths_lightcone, bins=np.linspace(0, 0.01, 100))
 ax1.set_xlabel(r'Time length of the branch $(s)$')
 ax1.set_ylabel(r'Number of branches')
 ax1.set_title(r'Light cone algorithm')
 
 ax2 = fig.add_subplot(122)
-ax2.hist(lengths_mesh, bins=25)
+ax2.hist(lengths_mesh, bins=np.linspace(0, 0.01, 100))
 ax2.set_xlabel(r'Time length of the branch $(s)$')
 ax2.set_ylabel(r'Number of branches')
 ax2.set_title(r'Voxel algorithm')
 
-fig.savefig('Figures/timelength_data_' + dataname + '.png', bbox_inches='tight')
+fig.savefig('Figures/timelength_data_t90_' + dataname + '_close.png', bbox_inches='tight')

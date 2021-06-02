@@ -14,13 +14,7 @@ t = data[:, 3]
 dataname = 'combined'
 
 events_lightcone = []
-bp_lightcone = []
 events_mesh = []
-bp_mesh = []
-
-total_lightcone = 0
-total_mesh = 0
-total = 0
 
 p = 5
 
@@ -43,21 +37,15 @@ analyzer_lightcone.load_tree_from_file("Data_"+dataset+".pickle")
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
 analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
 
-total += len(tcut)
-
 for i in range(analyzer_lightcone.nr_of_branches()):
     t_branch, _, _, _, _ = analyzer_lightcone.give_branch(i)
-    t_0 = np.percentile(t_branch, p)
-    bp_lightcone.append(t_0)
-    events_lightcone.extend(t_branch - t_0)
-    total_lightcone += len(t_branch)
+    t_end = np.percentile(t_branch, 100-p)
+    events_lightcone.extend(t_end - t_branch)
 
 for i in range(analyzer_mesh.nr_of_branches()):
     t_branch, _, _, _, _ = analyzer_mesh.give_branch(i)
-    t_0 = np.percentile(t_branch, p)
-    bp_mesh.append(t_0)
-    events_mesh.extend(t_branch - t_0)
-    total_mesh += len(t_branch)
+    t_end = np.percentile(t_branch, 100-p)
+    events_mesh.extend(t_end - t_branch)
 
 dataset = 'subset_2'
 xmin = x > 3000
@@ -78,21 +66,15 @@ analyzer_lightcone.load_tree_from_file("Data_"+dataset+".pickle")
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
 analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
 
-total += len(tcut)
-
 for i in range(analyzer_lightcone.nr_of_branches()):
     t_branch, _, _, _, _ = analyzer_lightcone.give_branch(i)
-    t_0 = np.percentile(t_branch, p)
-    bp_lightcone.append(t_0)
-    events_lightcone.extend(t_branch - t_0)
-    total_lightcone += len(t_branch)
+    t_end = np.percentile(t_branch, 100-p)
+    events_lightcone.extend(t_end - t_branch)
 
 for i in range(analyzer_mesh.nr_of_branches()):
     t_branch, _, _, _, _ = analyzer_mesh.give_branch(i)
-    t_0 = np.percentile(t_branch, p)
-    bp_mesh.append(t_0)
-    events_mesh.extend(t_branch - t_0)
-    total_mesh += len(t_branch)
+    t_end = np.percentile(t_branch, 100-p)
+    events_mesh.extend(t_end - t_branch)
 
 dataset = 'subset_3'
 xmin = x > -4500
@@ -113,21 +95,15 @@ analyzer_lightcone.load_tree_from_file("Data_"+dataset+".pickle")
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
 analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
 
-total += len(tcut)
-
 for i in range(analyzer_lightcone.nr_of_branches()):
     t_branch, _, _, _, _ = analyzer_lightcone.give_branch(i)
-    t_0 = np.percentile(t_branch, p)
-    bp_lightcone.append(t_0)
-    events_lightcone.extend(t_branch - t_0)
-    total_lightcone += len(t_branch)
+    t_end = np.percentile(t_branch, 100-p)
+    events_lightcone.extend(t_end - t_branch)
 
 for i in range(analyzer_mesh.nr_of_branches()):
     t_branch, _, _, _, _ = analyzer_mesh.give_branch(i)
-    t_0 = np.percentile(t_branch, p)
-    bp_mesh.append(t_0)
-    events_mesh.extend(t_branch - t_0)
-    total_mesh += len(t_branch)
+    t_end = np.percentile(t_branch, 100-p)
+    events_mesh.extend(t_end - t_branch)
 
 dataset = 'subset_4'
 xmin = x > 6000
@@ -150,25 +126,15 @@ analyzer_lightcone.load_tree_from_file("Data_"+dataset+".pickle")
 analyzer_mesh = MeshAnalyzer(tcut, xcut, ycut, zcut, min_voxel_size=50, max_voxel_size=300)
 analyzer_mesh.load_tree_from_file("Data_" + dataset + ".pickle")
 
-total += len(tcut)
-
 for i in range(analyzer_lightcone.nr_of_branches()):
     t_branch, _, _, _, _ = analyzer_lightcone.give_branch(i)
-    t_0 = np.percentile(t_branch, p)
-    bp_lightcone.append(t_0)
-    events_lightcone.extend(t_branch - t_0)
-    total_lightcone += len(t_branch)
+    t_end = np.percentile(t_branch, 100-p)
+    events_lightcone.extend(t_end - t_branch)
 
 for i in range(analyzer_mesh.nr_of_branches()):
     t_branch, _, _, _, _ = analyzer_mesh.give_branch(i)
-    t_0 = np.percentile(t_branch, p)
-    bp_mesh.append(t_0)
-    events_mesh.extend(t_branch - t_0)
-    total_mesh += len(t_branch)
-
-print(f"Light cone has a total of {total_lightcone} number of events")
-print(f"Voxel has a total of {total_mesh} number of events")
-print(f"The data set has {total} numbers of events")
+    t_end = np.percentile(t_branch, 100-p)
+    events_mesh.extend(t_end - t_branch)
 
 events_lightcone = np.array(events_lightcone)
 events_lightcone = events_lightcone[events_lightcone<0.01]
@@ -181,20 +147,21 @@ gs = GridSpec(1, 2, figure=fig)
 ax1 = fig.add_subplot(gs[0, 0])
 
 ax1.hist(events_lightcone, align='mid', bins=np.linspace(-0.01, 0.01, 200))
-ax1.set_xlim((-0.005, 0.01))
-ax1.set_ylim((0, 420))
-ax1.set_xlabel(r'$t - t_0 (s)$')
+ax1.set_xlim((-0.001, 0.01))
+ax1.set_ylim((0, 700))
+ax1.invert_xaxis()
+ax1.set_xlabel(r'$t_{end} - t$ $(s)$')
 ax1.set_ylabel(r'Density')
 ax1.set_title(r'Light cone algorithm')
 
 ax2 = fig.add_subplot(gs[0, 1:])
 
 ax2.hist(events_mesh, align='mid', bins=np.linspace(-0.01, 0.01, 200))
-ax2.set_xlim((-0.005, 0.01))
-ax2.set_ylim((0, 420))
-ax2.set_xlabel(r'$t - t_0 (s)$')
+ax2.set_xlim((-0.001, 0.01))
+ax2.set_ylim((0, 700))
+ax2.invert_xaxis()
+ax2.set_xlabel(r'$t_{end} - t$ $(s)$')
 ax2.set_ylabel(r'Density')
 ax2.set_title(r'Voxel algorithm')
-# ax2.xaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))
 
-fig.savefig(f'Figures/ef_data_per{p}_{dataname}_close.png', bbox_inches='tight')
+fig.savefig(f'Figures/efe_data_per{p}_{dataname}_close.png', bbox_inches='tight')
